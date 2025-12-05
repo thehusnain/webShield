@@ -2,6 +2,7 @@ import express from "express";
 import { userValidation } from "../utils/validations/user-validation.js";
 import { checkUser,addUser } from "../controllers/users-controller.js";
 import { checkAuth } from "../middlewares/auth.js";
+import { User } from "../models/users-mongo.js";
 
 const userRouter = express.Router();
 
@@ -30,11 +31,20 @@ userRouter.post("/login",userValidation, async (req, res) => {
   }
 });
 
-userRouter.get("/profile", checkAuth, (req,res) => {
-  res.json({
-    message : "welcome to your profile",
-    user : req.user
-  });
+userRouter.get("/profile", checkAuth, async (req,res) => {
+    const user = await User.findById(req.user.userId);
+    
+    res.json({
+        message: "Welcome to your profile",
+        user: {
+            username: user.username,
+            email: user.email,
+            role: user.role,
+            scanLimit: user.scanLimit || 5,
+            scansUsed: user.usedScan || 0,  
+            scansRemaining: (user.scanLimit || 5) - (user.usedScan || 0)
+        }
+    });
 });
 
 userRouter.get("/admin", checkAuth , (req,res) => {
