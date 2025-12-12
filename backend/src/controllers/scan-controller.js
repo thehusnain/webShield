@@ -198,14 +198,14 @@ export async function getAllScanHistory(req, res) {
 }
 export async function getUserScanHistoryAdmin(req, res) {
     try {
-        const userId = req.params.userId; // Get user ID from URL
+        const userId = req.params.userId;
         
         // Get all scans for this user
         const scans = await Scan.find({ userId: userId })
             .sort({ createdAt: -1 });
         
         // Also get user info
-        const user = await User.findById(userId).select('username email role');
+        const user = await User.findById(userId).select('username email role scanLimit');
         
         if (!user) {
             return res.status(404).json({
@@ -220,7 +220,8 @@ export async function getUserScanHistoryAdmin(req, res) {
                 userId: user._id,
                 username: user.username,
                 email: user.email,
-                role: user.role
+                role: user.role,
+                scanLimit : user.scanLimit
             },
             totalScans: scans.length,
             scans: scans
@@ -328,7 +329,7 @@ export async function upgradeUserScan(req,res){
         
         const updatedUser = await User.findByIdAndUpdate(
             userId,
-            { $set: { scanLimit: scanLimit } }, // Set specific limit
+            { $set: { scanLimit: scanLimit } },
             { new: true }
         );
         

@@ -1,19 +1,20 @@
 import express from "express";
-import { userValidation } from "../utils/validations/user-validation.js";
+import { loginValidation, signUpValidation } from "../utils/validations/user-validation.js";
 import { checkUser,addUser } from "../controllers/users-controller.js";
 import { checkAuth } from "../middlewares/auth.js";
 import { User } from "../models/users-mongo.js";
+import { checkAdmin } from "../middlewares/admin-auth.js";
 
 const userRouter = express.Router();
 
-userRouter.post("/signup",  userValidation,async (req,res) => {
+userRouter.post("/signup",  signUpValidation,async (req,res) => {
     const user = req.body;
     const respose = await addUser(user);
     res.send({
         data : respose
     });
 });
-userRouter.post("/login",userValidation, async (req, res) => {
+userRouter.post("/login",loginValidation, async (req, res) => {
     const user = req.body;
     const response = await checkUser(user);
     if (response.error) {
@@ -47,12 +48,11 @@ userRouter.get("/profile", checkAuth, async (req,res) => {
     });
 });
 
-userRouter.get("/admin", checkAuth , (req,res) => {
-  if(req.user.role === "admin"){
-     res.json({message : "Welcome Admin! "});
-  }else {
-   res.json({error : "Admin access is required"});
-  }
+userRouter.get("/admin", checkAuth,checkAdmin, (req,res) => {
+    res.json({
+      message : "Welcome Admin",
+      user : req.user
+    })  
 });
 
 userRouter.post("/logout", (req,res) => {
@@ -62,7 +62,5 @@ userRouter.post("/logout", (req,res) => {
     message : "Logged out Successfully"
   });
 });
-
-
 
 export default userRouter;

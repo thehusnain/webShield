@@ -23,12 +23,14 @@ export async function createUser(user){
         }
 
         const salt = bcrypt.genSaltSync(10);
-        const hash = bcrypt.hashSync(user.password,salt);
+        const hashedPass = bcrypt.hashSync(user.password,salt);
+
         const newUser = new User({
             username : user.username,
             email : user.email,
-            password : hash
+            password : hashedPasss
         });
+
         const savedUser = await newUser.save();
         return savedUser;           
     } catch (error) {
@@ -39,10 +41,14 @@ export async function createUser(user){
 
 export async function verifyUser(user) {
     try {
-        const email = user.email;
+        const identifier = user.emailOrUsername;
+        // const email = user.email
         const password = user.password;
         
-        const userExists = await User.findOne({ email: email });
+        const userExists = await User.findOne({ $or:[
+            {email : identifier},
+            {username : identifier}
+]});
         
         if(!userExists){
             return {
