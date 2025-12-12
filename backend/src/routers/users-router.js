@@ -1,23 +1,26 @@
 import express from "express";
-import { loginValidation, signUpValidation } from "../utils/validations/user-validation.js";
-import { checkUser,addUser } from "../controllers/users-controller.js";
+import {
+  loginValidation,
+  signUpValidation,
+} from "../utils/validations/user-validation.js";
+import { checkUser, addUser } from "../controllers/users-controller.js";
 import { checkAuth } from "../middlewares/auth.js";
 import { User } from "../models/users-mongo.js";
 import { checkAdmin } from "../middlewares/admin-auth.js";
 
 const userRouter = express.Router();
 
-userRouter.post("/signup",  signUpValidation,async (req,res) => {
-    const user = req.body;
-    const respose = await addUser(user);
-    res.send({
-        data : respose
-    });
+userRouter.post("/signup", signUpValidation, async (req, res) => {
+  const user = req.body;
+  const respose = await addUser(user);
+  res.send({
+    data: respose,
+  });
 });
-userRouter.post("/login",loginValidation, async (req, res) => {
-    const user = req.body;
-    const response = await checkUser(user);
-    if (response.error) {
+userRouter.post("/login", loginValidation, async (req, res) => {
+  const user = req.body;
+  const response = await checkUser(user);
+  if (response.error) {
     res.send({
       data: response,
     });
@@ -32,34 +35,34 @@ userRouter.post("/login",loginValidation, async (req, res) => {
   }
 });
 
-userRouter.get("/profile", checkAuth, async (req,res) => {
-    const user = await User.findById(req.user.userId);
-    
-    res.json({
-        message: "Welcome to your profile",
-        user: {
-            username: user.username,
-            email: user.email,
-            role: user.role,
-            scanLimit: user.scanLimit || 5,
-            scansUsed: user.usedScan || 0,  
-            scansRemaining: (user.scanLimit || 5) - (user.usedScan || 0)
-        }
-    });
+userRouter.get("/profile", checkAuth, async (req, res) => {
+  const user = await User.findById(req.user.userId);
+
+  res.json({
+    message: "Welcome to your profile",
+    user: {
+      username: user.username,
+      email: user.email,
+      role: user.role,
+      scanLimit: user.scanLimit || 5,
+      scansUsed: user.usedScan || 0,
+      scansRemaining: (user.scanLimit || 5) - (user.usedScan || 0),
+    },
+  });
 });
 
-userRouter.get("/admin", checkAuth,checkAdmin, (req,res) => {
-    res.json({
-      message : "Welcome Admin",
-      user : req.user
-    })  
+userRouter.get("/admin", checkAuth, checkAdmin, (req, res) => {
+  res.json({
+    message: "Welcome Admin",
+    user: req.user,
+  });
 });
 
-userRouter.post("/logout", (req,res) => {
+userRouter.post("/logout", (req, res) => {
   res.clearCookie("token");
   res.json({
-    success : true,
-    message : "Logged out Successfully"
+    success: true,
+    message: "Logged out Successfully",
   });
 });
 

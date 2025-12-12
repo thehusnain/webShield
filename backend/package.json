@@ -22,5 +22,8 @@
     "nodemailer": "^7.0.11",
     "nodemon": "^3.1.11",
     "pdfkit": "^0.17.2"
+  },
+  "devDependencies": {
+    "prettier": "^3.7.4"
   }
 }

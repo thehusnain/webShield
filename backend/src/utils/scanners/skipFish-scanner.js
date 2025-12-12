@@ -1,31 +1,33 @@
-import {exec} from "child_process";
-import { promisify} from "util";
-
+import { exec } from "child_process";
+import { promisify } from "util";
+import fs from "fs";
 const execAsync = promisify(exec);
 
 export async function scanWithSkipfish(targetUrl) {
-    try {
-        console.log(`Starting Skipfish scan for: ${targetUrl}`);
-        const reportDir = `/tmp/skipfish-${Date.now()}`;
-        const command = `skipfish -o ${reportDir} ${targetUrl}`;
-        await execAsync(command);
-        
-        const reportPath = `${reportDir}/index.html`;
-        const vulnerabilities = [];
+  try {
+    const reportDir = `/tmp/skipfish-${Date.now()}`;
+    const command = `skipfish -o ${reportDir} ${targetUrl}`;
+    await execAsync(command);
 
-    
-        console.log(` Skipfish completed! Report saved at: ${reportDir}`);
-        
-        return {
-            reportPath: reportDir,
-            message: "Scan completed. Check HTML report for vulnerabilities."
-        };
-        
-    } catch (error) {
-        console.log('Skipfish error:', error.message);
-        return {
-            reportPath: null,
-            error: error.message
-        };
-    }
+    // READ HTML FILE
+    const htmlPath = `${reportDir}/index.html`;
+    const htmlContent = fs.readFileSync(htmlPath, "utf8");
+
+    // CLEAN UP TEMP FOLDER
+    fs.rmSync(reportDir, { recursive: true, force: true });
+
+    // RETURN HTML FOR DATABASE
+    return {
+      htmlReport: htmlContent, 
+      vulnerabilities: [], 
+      message: "Scan completed...",
+    };
+  } catch (error) {
+    console.log("Skipfish error:", error.message);
+    return {
+      success: false,
+      htmlReport: null,
+      error: error.message,
+    };
+  }
 }

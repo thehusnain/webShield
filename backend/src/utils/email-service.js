@@ -1,44 +1,44 @@
-import nodemailer from 'nodemailer';
-import dotenv from 'dotenv';
+import nodemailer from "nodemailer";
+import dotenv from "dotenv";
 
 dotenv.config();
 
-const emailUser = process.env.EMAIL_USER 
-const emailPass = process.env.EMAIL_PASSWORD 
+const emailUser = process.env.EMAIL_USER;
+const emailPass = process.env.EMAIL_PASSWORD;
 
 if (!emailUser || !emailPass) {
-  console.error('❌ Email credentials missing! Check .env file');
+  console.error("Email credentials missing! Check .env file");
 }
 
 const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: emailUser,
-        pass: emailPass
-    }
+  service: "gmail",
+  auth: {
+    user: emailUser,
+    pass: emailPass,
+  },
 });
-transporter.verify(function(error, success) {
-    if (error) {
-        console.log('Email transporter error:', error);
-    } else {
-        console.log('Email transporter is ready');
-    }
+transporter.verify(function (error, success) {
+  if (error) {
+    console.log("Email transporter error:", error);
+  } else {
+    console.log("Email transporter is ready");
+  }
 });
 
 export async function sendResetPassEmail(email, resetToken) {
-    try {
-        console.log(`Attempting to send reset email to: ${email}`);
-        
-        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
-        const resetLink = `${frontendUrl}/reset-password?token=${resetToken}`;
+  try {
+    console.log(`Attempting to send reset email to: ${email}`);
 
-        console.log('Reset link:', resetLink);
+    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000";
+    const resetLink = `${frontendUrl}/reset-password?token=${resetToken}`;
 
-        const mailOptions = {
-            from: `"WebShield Security" <${emailUser}>`,
-            to: email,
-            subject: "Reset your WebShield Password",
-            html: `
+    console.log("Reset link:", resetLink);
+
+    const mailOptions = {
+      from: `"WebShield Security" <${emailUser}>`,
+      to: email,
+      subject: "Reset your WebShield Password",
+      html: `
                 <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
                     <h2 style="color: #2563eb;">Password Reset Request</h2>
                     
@@ -74,19 +74,18 @@ export async function sendResetPassEmail(email, resetToken) {
                         Your Website Security Partner
                     </p>
                 </div>
-            `
-        };
+            `,
+    };
 
-        console.log('Sending email...');
-        const info = await transporter.sendMail(mailOptions);
-        console.log(`Password reset email sent to: ${email}`);
-        console.log(`Email ID: ${info.messageId}`);
+    console.log("Sending email...");
+    const info = await transporter.sendMail(mailOptions);
+    console.log(`Password reset email sent to: ${email}`);
+    console.log(`Email ID: ${info.messageId}`);
 
-        return true;
-        
-    } catch (error) {
-        console.error('Error sending email:', error.message);
-        console.error('Full error:', error);
-        return false;
-    }
+    return true;
+  } catch (error) {
+    console.error("Error sending email:", error.message);
+    console.error("Full error:", error);
+    return false;
+  }
 }
