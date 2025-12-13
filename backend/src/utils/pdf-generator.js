@@ -1,269 +1,354 @@
-import PDFDocument from "pdfkit";
+import PDFDocument from 'pdfkit';
 
-// Remove ANSI colors from SSLScan
-const stripAnsi = (text) => text.replace(/\u001b\[[0-9;]*m/g, "");
-
-export async function generateScanReport(scan) {
-  const doc = new PDFDocument({ margin: 50, autoFirstPage: false });
-  const chunks = [];
-
+export async function generateScanReport(scanData) {
   return new Promise((resolve, reject) => {
-    doc.on("data", (c) => chunks.push(c));
-    doc.on("end", () => resolve(Buffer.concat(chunks)));
-    doc.on("error", reject);
-
-    // PAGE 1 — COVER PAGE
-    doc.addPage();
-
-    doc.rect(0, 0, doc.page.width, doc.page.height).fill("#1E2A38");
-
-    doc
-      .fillColor("white")
-      .fontSize(40)
-      .text("WebShield Security Report", { align: "center", marginTop: 200 });
-
-    doc.moveDown(2);
-
-    doc
-      .fontSize(16)
-      .text(`Target URL: ${scan.targetUrl}`, { align: "center" })
-      .text(`Scan Date: ${new Date(scan.createdAt).toLocaleString()}`, {
-        align: "center",
+    try {
+      const doc = new PDFDocument({
+        margin: 40,
+        size: 'A4'
       });
-
-    // PAGE 2 — SCAN INFORMATION
-    doc.addPage();
-    sectionTitle(doc, "1. Scan Information");
-
-    addField(doc, "Target URL", scan.targetUrl);
-    addField(doc, "Scan Type", scan.scanType || "Full Website Scan");
-    addField(doc, "Scan Time", new Date(scan.createdAt).toLocaleString());
-    addField(doc, "Status", scan.status);
-
-    doc.moveDown(1);
-
-    // RAW TOOL OUTPUT — ALL 4 TOOLS
-    doc.addPage();
-    sectionTitle(doc, "2. Raw Tool Output");
-
-    // Clean SSL output
-    const cleanSSL = (scan.results?.sslscan || []).map((s) => stripAnsi(s));
-
-    printRaw(doc, "Nmap — Open Ports", scan.results?.nmap?.openPorts);
-    printRaw(doc, "Gobuster — Directory Enumeration", scan.results?.gobuster);
-    printRaw(doc, "Skipfish — Vulnerability Report", scan.results?.skipfish);
-    printRaw(doc, "SSLScan — SSL/TLS Issues", cleanSSL);
-
-    // ANALYSIS
-    doc.addPage();
-    sectionTitle(doc, "3. Analysis & Explanation");
-
-    const analysis = generateAnalysis(scan, cleanSSL);
-
-    doc.fontSize(14).fillColor("black").text(analysis.summary);
-    doc.moveDown();
-
-    doc
-      .fontSize(16)
-      .fillColor("#1E2A38")
-      .text("Detailed Explanation:", { underline: true });
-
-    doc
-      .fontSize(13)
-      .fillColor("black")
-      .text(analysis.details, { align: "left" });
-
-    // RECOMMENDATIONS
-    doc.addPage();
-    sectionTitle(doc, "4. Recommendations");
-
-    analysis.recommendations.forEach((r, i) => {
-      doc
-        .fontSize(14)
-        .fillColor("black")
-        .text(`${i + 1}. ${r}`);
-      doc.moveDown(0.5);
-    });
-
-    doc.end();
+      
+      const buffers = [];
+      
+      doc.on('data', buffers.push.bind(buffers));
+      doc.on('end', () => resolve(Buffer.concat(buffers)));
+      doc.on('error', reject);
+      
+      // ========== HEADER ==========
+      doc.fillColor('#2d3748')
+         .fontSize(24)
+         .text('Scan Report', 0, 50, { align: 'center' });
+      
+      doc.fillColor('#718096')
+         .fontSize(14)
+         .text(scanData.targetUrl, 0, 85, { align: 'center' });
+      
+      doc.fillColor('#a0aec0')
+         .fontSize(10)
+         .text(`Scan ID: ${scanData._id.toString().slice(-8)} | Generated: ${new Date().toLocaleDateString()}`, 
+               0, 105, { align: 'center' });
+      
+      doc.strokeColor('#4299e1')
+         .lineWidth(1)
+         .moveTo(50, 125)
+         .lineTo(550, 125)
+         .stroke();
+      
+      // ========== SECTION 1: SCAN RESULTS ==========
+      doc.fillColor('#2d74da')
+         .fontSize(18)
+         .text('Scan Results', 50, 155);
+      
+      let yPosition = 195;
+      
+      // Extract data
+      const ports = scanData.findings?.openPorts || [];
+      const directories = scanData.findings?.hiddenDirectories || [];
+      
+      // Open Ports
+      if (ports.length > 0) {
+        doc.fillColor('#2d3748')
+           .fontSize(14)
+           .text('Open Ports Found:', 70, yPosition);
+        
+        ports.forEach((port, i) => {
+          const service = getServiceName(port.port);
+          const riskLevel = getPortRiskLevel(port.port);
+          const riskColor = getRiskColor(riskLevel);
+          
+          doc.fillColor(riskColor)
+             .fontSize(12)
+             .text(`• Port ${port.port} (${service}) - ${riskLevel} Risk`, 90, yPosition + 25 + (i * 20));
+        });
+        yPosition += 50 + (ports.length * 20);
+      } else {
+        doc.fillColor('#2d3748')
+           .fontSize(14)
+           .text('Open Ports Found:', 70, yPosition);
+        
+        doc.fillColor('#48bb78')
+           .fontSize(12)
+           .text('• No open ports detected', 90, yPosition + 25);
+        yPosition += 70;
+      }
+      
+      // Hidden Directories
+      if (directories.length > 0) {
+        doc.fillColor('#2d3748')
+           .fontSize(14)
+           .text('Hidden Directories Found:', 70, yPosition);
+        
+        directories.slice(0, 10).forEach((dir, i) => {
+          doc.fillColor('#4a5568')
+             .fontSize(12)
+             .text(`• ${dir}`, 90, yPosition + 25 + (i * 20));
+        });
+        yPosition += 50 + (Math.min(directories.length, 10) * 20);
+      }
+      
+      // ========== SECTION 2: SECURITY ASSESSMENT ==========
+      doc.fillColor('#2d3748')
+         .fontSize(18)
+         .text('Security Assessment', 50, yPosition + 20);
+      
+      yPosition += 60;
+      
+      // ========== WEAKNESSES FOUND ==========
+      doc.fillColor('#f56565')
+         .fontSize(16)
+         .text('Weaknesses Found', 70, yPosition);
+      
+      yPosition += 40;
+      
+      const weaknesses = [];
+      
+      // Check for HIGH RISK ports (these are actual weaknesses)
+      const highRiskPorts = ports.filter(port => getPortRiskLevel(port.port) === 'High');
+      if (highRiskPorts.length > 0) {
+        highRiskPorts.forEach(port => {
+          const service = getServiceName(port.port);
+          weaknesses.push(`Port ${port.port} (${service}) exposed - High risk service should not be publicly accessible`);
+        });
+      }
+      
+      // Check for MEDIUM RISK ports with specific conditions
+      const mediumRiskPorts = ports.filter(port => getPortRiskLevel(port.port) === 'Medium');
+      const riskyMediumPorts = mediumRiskPorts.filter(port => {
+        // HTTP without HTTPS is medium risk
+        if (port.port === 80 && !ports.some(p => p.port === 443)) {
+          return true;
+        }
+        // Other medium risk ports
+        return [21, 23, 25, 110, 143].includes(port.port);
+      });
+      
+      if (riskyMediumPorts.length > 0) {
+        riskyMediumPorts.forEach(port => {
+          const service = getServiceName(port.port);
+          if (port.port === 80 && !ports.some(p => p.port === 443)) {
+            weaknesses.push(`HTTP (port 80) without HTTPS (port 443) - Traffic is not encrypted`);
+          } else {
+            weaknesses.push(`Port ${port.port} (${service}) exposed - Consider securing this service`);
+          }
+        });
+      }
+      
+      // Check for sensitive directories
+      const sensitiveDirs = directories.filter(dir => 
+        dir.includes('admin') || 
+        dir.includes('backup') || 
+        dir.includes('config') ||
+        dir.includes('.git') ||
+        dir.includes('.env') ||
+        dir.includes('phpinfo') ||
+        dir.includes('test')
+      );
+      
+      if (sensitiveDirs.length > 0) {
+        sensitiveDirs.slice(0, 3).forEach(dir => {
+          weaknesses.push(`Sensitive directory exposed: ${dir}`);
+        });
+      }
+      
+      // Check for too many open ports
+      if (ports.length > 20) {
+        weaknesses.push(`Excessive number of open ports (${ports.length}) - Increases attack surface`);
+      }
+      
+      // Display weaknesses or "No weaknesses found"
+      if (weaknesses.length === 0) {
+        doc.fillColor('#48bb78')
+           .fontSize(14)
+           .text('No security weaknesses detected', 90, yPosition);
+        
+        // Add explanation for common ports
+        const commonPorts = ports.filter(port => 
+          getPortRiskLevel(port.port) === 'Low' || 
+          port.port === 80 || 
+          port.port === 443
+        );
+        
+        if (commonPorts.length > 0) {
+          yPosition += 40;
+          doc.fillColor('#718096')
+             .fontSize(11)
+             .text(
+               'Note: Common service ports (HTTP/HTTPS) are expected to be open for web applications. ' +
+               'These are not considered security weaknesses unless misconfigured.',
+               70, yPosition, { width: 480, align: 'left' }
+             );
+        }
+        yPosition += 60;
+      } else {
+        weaknesses.forEach((weakness, i) => {
+          doc.fillColor('#f56565')
+             .fontSize(12)
+             .text(`• ${weakness}`, 90, yPosition + (i * 25));
+        });
+        yPosition += weaknesses.length * 25 + 20;
+      }
+      
+      // ========== SECTION 3: SECURITY RECOMMENDATIONS ==========
+      doc.fillColor('#2d74da')
+         .fontSize(16)
+         .text('Security Recommendations', 70, yPosition);
+      
+      yPosition += 40;
+      
+      const recommendations = [];
+      
+      // Generate recommendations based on findings
+      if (highRiskPorts.length > 0) {
+        recommendations.push('Close or restrict access to high-risk ports (SSH, FTP, Telnet, RDP)');
+      }
+      
+      if (ports.some(p => p.port === 80) && !ports.some(p => p.port === 443)) {
+        recommendations.push('Implement HTTPS (SSL/TLS) to encrypt web traffic');
+      }
+      
+      if (sensitiveDirs.length > 0) {
+        recommendations.push('Remove or restrict access to sensitive directories');
+      }
+      
+      if (ports.length > 10) {
+        recommendations.push('Review and reduce the number of open ports');
+      }
+      
+      // Add general recommendations if no specific ones
+      if (recommendations.length === 0 && ports.length > 0) {
+        recommendations.push('Regularly review and monitor open ports');
+        recommendations.push('Keep services updated with security patches');
+        recommendations.push('Implement a Web Application Firewall (WAF)');
+      }
+      
+      recommendations.forEach((rec, i) => {
+        doc.fillColor('#4a5568')
+           .fontSize(12)
+           .text(`• ${rec}`, 90, yPosition + (i * 25));
+      });
+      
+      yPosition += recommendations.length * 25 + 30;
+      
+      // ========== SECTION 4: SUMMARY ==========
+      doc.fillColor('#2d3748')
+         .fontSize(16)
+         .text('Summary', 70, yPosition);
+      
+      yPosition += 30;
+      
+      // Summary statistics
+      const totalPorts = ports.length;
+      const highRiskCount = highRiskPorts.length;
+      const mediumRiskCount = mediumRiskPorts.length;
+      const lowRiskCount = ports.filter(p => getPortRiskLevel(p.port) === 'Low').length;
+      
+      doc.fillColor('#4a5568')
+         .fontSize(12)
+         .text(`Total Open Ports: ${totalPorts}`, 90, yPosition);
+      
+      doc.fillColor('#f56565')
+         .fontSize(12)
+         .text(`High Risk Ports: ${highRiskCount}`, 90, yPosition + 20);
+      
+      doc.fillColor('#d69e2e')
+         .fontSize(12)
+         .text(`Medium Risk Ports: ${mediumRiskCount}`, 90, yPosition + 40);
+      
+      doc.fillColor('#48bb78')
+         .fontSize(12)
+         .text(`Low Risk Ports: ${lowRiskCount}`, 90, yPosition + 60);
+      
+      // Overall assessment
+      yPosition += 90;
+      let overallColor = '#48bb78';
+      let overallMessage = 'Good Security Posture';
+      
+      if (highRiskCount > 0) {
+        overallColor = '#f56565';
+        overallMessage = 'Needs Immediate Attention';
+      } else if (mediumRiskCount > 0) {
+        overallColor = '#d69e2e';
+        overallMessage = 'Needs Improvement';
+      }
+      
+      doc.fillColor(overallColor)
+         .fontSize(14)
+         .text(`Overall Assessment: ${overallMessage}`, 70, yPosition);
+      
+      // ========== END DOCUMENT ==========
+      doc.end();
+      
+    } catch (error) {
+      reject(error);
+    }
   });
 }
 
-// Helper Functions
-function sectionTitle(doc, title) {
-  doc.fillColor("#1E2A38").fontSize(22).text(title, { underline: true });
-  doc.moveDown(1);
+// Helper functions
+function getServiceName(portNumber) {
+  const commonPorts = {
+    80: 'HTTP', 443: 'HTTPS/SSL', 22: 'SSH', 21: 'FTP',
+    25: 'SMTP', 53: 'DNS', 3306: 'MySQL', 3389: 'RDP',
+    23: 'Telnet', 110: 'POP3', 143: 'IMAP', 445: 'SMB',
+    8080: 'HTTP-Proxy', 8443: 'HTTPS-Alt', 27017: 'MongoDB',
+    6379: 'Redis', 9200: 'Elasticsearch'
+  };
+  return commonPorts[portNumber] || `Service ${portNumber}`;
 }
 
-function addField(doc, label, value) {
-  doc.fontSize(14).fillColor("black").text(`${label}: `, { continued: true });
-
-  doc.fillColor("#444").text(value ?? "N/A");
-  doc.moveDown(0.4);
+function getPortRiskLevel(portNumber) {
+  // HIGH RISK: Services that should NEVER be publicly exposed
+  const highRiskPorts = [
+    22,    // SSH
+    23,    // Telnet
+    3389,  // RDP
+    445,   // SMB
+    1433,  // MSSQL
+    1521,  // Oracle DB
+    5432,  // PostgreSQL
+    27017, // MongoDB
+    6379,  // Redis
+    9200   // Elasticsearch
+  ];
+  
+  // MEDIUM RISK: Services that need proper configuration
+  const mediumRiskPorts = [
+    21,    // FTP
+    25,    // SMTP
+    110,   // POP3
+    143,   // IMAP
+    161,   // SNMP
+    389,   // LDAP
+    587,   // SMTP Submission
+    993,   // IMAPS
+    995,   // POP3S
+    3306,  // MySQL
+    5900   // VNC
+  ];
+  
+  // LOW RISK: Common web/service ports (expected to be open)
+  const lowRiskPorts = [
+    80,    // HTTP
+    443,   // HTTPS
+    53,    // DNS
+    123,   // NTP
+    8080,  // HTTP Alt
+    8443,  // HTTPS Alt
+    3000,  // Node.js
+    5000   // Flask/Debug
+  ];
+  
+  if (highRiskPorts.includes(portNumber)) return 'High';
+  if (mediumRiskPorts.includes(portNumber)) return 'Medium';
+  if (lowRiskPorts.includes(portNumber)) return 'Low';
+  return 'Medium'; // Default unknown ports to Medium risk
 }
 
-function printRaw(doc, title, data) {
-  doc.fontSize(16).fillColor("#1E2A38").text(title, { underline: true });
-  doc.moveDown(0.5);
-
-  if (!data || data.length === 0) {
-    doc.fontSize(12).fillColor("#999").text("No data found.\n");
-    return;
-  }
-
-  doc.fontSize(12).fillColor("black");
-
-  data.forEach((item) => {
-    const clean = typeof item === "string" ? item : JSON.stringify(item);
-    doc.text(`• ${clean}`);
-  });
-
-  doc.moveDown(1);
-}
-function generateAnalysis(scan, sslIssues) {
-  let details = "";
-  const recommendations = [];
-  const summary =
-    "The scan identified key observations regarding the website's security posture. Below is a detailed analysis and actionable recommendations to improve security.";
-
-  // SSL SCAN
-  const weak = sslIssues.filter(
-    (i) =>
-      i.includes("TLSv1.0") ||
-      i.includes("TLSv1.1") ||
-      i.includes("3DES") ||
-      i.includes("weak")
-  );
-
-  if (weak.length > 0) {
-    details +=
-      "⚠ SSLScan detected outdated or weak TLS protocols/ciphers in use. These weaken encryption and can expose sensitive user data.\n\n";
-
-    recommendations.push(
-      "Disable outdated TLS versions (TLS 1.0 & TLS 1.1) and weak ciphers such as 3DES.",
-      "Enable modern secure protocols only (TLS 1.2 and TLS 1.3).",
-      "Use strong cipher suites like ECDHE + AES256-GCM.",
-      "Enable HSTS (HTTP Strict Transport Security).",
-      "Ensure certificate is valid, not expired, and issued by a trusted CA."
-    );
-  }
-
-  // NMAP — PORT ANALYSIS
-  const openPorts = scan.results?.nmap?.openPorts || [];
-
-  if (openPorts.length > 0) {
-    const risky = openPorts.filter((p) =>
-      [21, 22, 23, 25, 3306, 3389].includes(p.port)
-    );
-
-    if (risky.length > 0) {
-      details +=
-        "⚠ Nmap detected risky open ports (e.g., SSH, FTP, Database ports). These expand the attack surface.\n\n";
-
-      recommendations.push(
-        "Close all unnecessary open ports using a firewall.",
-        "Restrict SSH/FTP/Database ports to specific IP addresses only.",
-        "Implement fail2ban or intrusion prevention for SSH/FTP services.",
-        "Ensure all exposed services are running latest versions with no known vulnerabilities."
-      );
-    } else {
-      details +=
-        "✓ Only common web ports appear open. Server exposure is minimal.\n\n";
-    }
-  }
-
-  // GOBUSTER — DIRECTORIES FOUND
-  const dirs = scan.results?.gobuster || [];
-
-  if (dirs.length > 0) {
-    const sensitive = dirs.filter((d) =>
-      ["/admin", "/backup", "/config", "/db", "/phpmyadmin", "/logs"].some(
-        (s) => d.includes(s)
-      )
-    );
-
-    if (sensitive.length > 0) {
-      details +=
-        "⚠ Gobuster discovered sensitive directories exposed publicly (admin panels, backups, configs, logs).\n\n";
-
-      recommendations.push(
-        "Restrict access to sensitive directories using authentication (Basic Auth, JWT, sessions).",
-        "Remove or relocate backup directories outside the web root.",
-        "Disable directory listing on the web server (Apache, NGINX, etc.).",
-        "Secure admin panels with 2FA and IP whitelisting."
-      );
-    }
-  }
-
-  // SKIPFISH — VULNERABILITIES
-  if (scan.results?.skipfish) {
-    doc.addPage();
-    doc
-      .fillColor("#dc2626")
-      .fontSize(22)
-      .text("Skipfish Vulnerability Scan", { underline: true });
-
-    doc.moveDown(0.5);
-    doc
-      .fillColor("black")
-      .fontSize(14)
-      .text("Skipfish scan completed successfully.")
-      .text("Detailed HTML report is available for download.")
-      .text(
-        `Report size: ${scan.results.skipfish.fileSize ? Math.round(scan.results.skipfish.fileSize / 1024) + " KB" : "N/A"}`
-      );
-
-    if (scan.results.skipfish.message) {
-      doc.text(`Status: ${scan.results.skipfish.message}`);
-    }
-  }
-  const skipfish = scan.results?.skipfish || [];
-
-  if (skipfish.length > 0) {
-    const critical = skipfish.filter((s) => {
-      const str = typeof s === "string" ? s : JSON.stringify(s);
-      return (
-        str.toLowerCase().includes("high") ||
-        str.toLowerCase().includes("critical") ||
-        str.toLowerCase().includes("vulnerability")
-      );
-    });
-
-    if (critical.length > 0) {
-      details +=
-        "Skipfish reported high or critical vulnerabilities related to the application layer.\n\n";
-
-      recommendations.push(
-        "Address high and critical vulnerabilities immediately.",
-        "Validate all input on both client and server side to prevent XSS/SQLi.",
-        "Implement strong access control and role-based permissions.",
-        "Use prepared statements and ORM to prevent SQL injection.",
-        "Sanitize all user-generated content before rendering."
-      );
-    }
-  }
-
-  // GENERAL SECURITY BEST PRACTICES
-  recommendations.push(
-    "Keep all server software, frameworks, and libraries updated.",
-    "Enable rate limiting and IP throttling to reduce brute-force attacks.",
-    "Use a Web Application Firewall (WAF) like ModSecurity or Cloudflare.",
-    "Regularly back up the website and database to secure offsite storage.",
-    "Implement proper logging and monitoring for unauthorized activity.",
-    "Conduct regular vulnerability scans and penetration testing.",
-    "Ensure strong password policies and enforce 2FA for admin accounts.",
-    "Use environment variables for sensitive credentials instead of hardcoding.",
-    "Enable CSRF protection tokens for all forms.",
-    "Use secure cookies (HttpOnly, Secure, SameSite).",
-    "Perform regular log reviews to detect suspicious activity.",
-    "Implement least-privilege access for all system accounts."
-  );
-
-  // If no details (very rare)
-  if (details === "") {
-    details =
-      "✓ No major threats or misconfigurations detected. The website appears to follow standard security practices.\n\n";
-  }
-
-  return { summary, details, recommendations };
+function getRiskColor(riskLevel) {
+  const colors = {
+    'High': '#f56565',
+    'Medium': '#d69e2e',
+    'Low': '#48bb78'
+  };
+  return colors[riskLevel] || '#718096';
 }

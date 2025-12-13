@@ -13,7 +13,6 @@ import { scanWithSkipfish } from "../utils/scanners/skipFish-scanner.js";
 import { scanWithSsl } from "../utils/scanners/ssl-scanner.js";
 import { urlValidation } from "../utils/validations/url-validation.js";
 import { checkDuplicateScan } from "../utils/validations/scan-validaton.js";
-import mongoose from "mongoose";
 
 //  STARTING A SCAN FUNCTION
 export async function startScan(req, res) {
@@ -58,16 +57,14 @@ export async function startScan(req, res) {
     // SHOWING MESSAGE AFTER COMPLETED 5 SCANS
     if (userRole === "user") {
       if (user.usedScan >= user.scanLimit) {
-        return res
-          .status(403)
-          .json(
-            {
-              error: `Scan limit reached, you have used ${user.usedScan}/${user.scanLimit} scans.`,
-              message:
-                "Upgrade your account to get unlimited accesss or contact to the admin",
-            },
-            { message: "You can also check your Scan limit in your profile" }
-          );
+        return res.status(403).json(
+          {
+            error: `Scan limit reached, you have used ${user.usedScan}/${user.scanLimit} scans.`,
+            message:
+              "Upgrade your account to get unlimited accesss or contact to the admin",
+          },
+          { message: "You can also check your Scan limit in your profile" }
+        );
       }
     }
 
@@ -104,7 +101,7 @@ export async function startScan(req, res) {
       let gobusterResult = [];
       let skipfishResult = [];
 
-    //   CHOOSING SCANTYPE
+      //   CHOOSING SCANTYPE
       if (scanType === "nmap" || scanType === "full") {
         console.log(`Starting Nmap scan for ${validation.url}`);
         nmapresult = await scanWithNmap(validation.url);
@@ -126,7 +123,11 @@ export async function startScan(req, res) {
         nmap: nmapresult,
         ssl: sslResult,
         gobuster: gobusterResult,
-        skipfish: skipfishResult,
+        skipfish: {
+          vulnerabilities: skipfishResult.vulnerabilities || [],
+          htmlReport: skipfishResult.htmlReport || null, // HTML as string
+          message: skipfishResult.message || "",
+        },
       });
       console.log(`Scan ${result._id} completed with results`);
     } catch (scanError) {
@@ -181,8 +182,7 @@ export async function getScanHistory(req, res) {
 // ALL SCANS HISTORY
 export async function getAllScanHistory(req, res) {
   try {
-   
-    const allScans = await Scan.find({}).sort({ createdAt: -1 }).lean(); 
+    const allScans = await Scan.find({}).sort({ createdAt: -1 }).lean();
 
     res.json({
       success: true,
@@ -234,7 +234,7 @@ export async function getUserScanHistoryAdmin(req, res) {
   }
 }
 
-// SCAN'S RESULT 
+// SCAN'S RESULT
 export async function getScanResults(req, res) {
   try {
     const scanId = req.params.id;
@@ -275,7 +275,7 @@ export async function removeScan(req, res) {
   }
 }
 
-// CANCALING A SCAN 
+// CANCALING A SCAN
 export async function cancelScan(req, res) {
   try {
     const scanId = req.params.id;
