@@ -12,8 +12,9 @@ export function generateTxtReport(scan, aiText) {
   const filePath = path.join(reportsDir, fileName);
 
   const content = `
+=========================
 WEB SECURITY SCAN REPORT
-=======================
+=========================
 
 Scan ID     : ${scan._id}
 Target URL : ${scan.targetUrl}

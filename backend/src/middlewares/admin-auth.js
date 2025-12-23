@@ -2,13 +2,6 @@ import { User } from "../models/users-mongoose.js";
 
 export async function checkAdmin(req, res, next) {
   try {
-    // First, check if req.user exists
-    if (!req.user) {
-      return res.status(401).json({
-        error: "Authentication required. Please log in first.",
-      });
-    }
-
     const userId = req.user.userId;
     const user = await User.findById(userId);
 

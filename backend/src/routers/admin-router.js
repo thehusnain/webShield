@@ -1,20 +1,37 @@
-import express from 'express'; 
-import { checkAdmin } from '../middlewares/admin-auth.js';
-import { checkAuth } from '../middlewares/user-auth.js';
-import { removeScan,upgradeUserScan,getAllScanHistory,getUserScanHistoryAdmin } from '../controllers/scan-controller.js';
+import express from "express";
+import { checkAuth } from "../middlewares/user-auth.js";
+import { checkAdmin } from "../middlewares/admin-auth.js";
+import {
+  removeScan,
+  upgradeUserScan,
+  getAllScanHistory,
+  getUserScanHistoryAdmin
+} from "../controllers/scan-controller.js";
 
 const adminRouter = express.Router();
 
-adminRouter.get("/", checkAuth, checkAdmin, (req, res) => {
+/**
+ * 🔐 Apply auth + admin check to ALL admin routes
+ */
+adminRouter.use(checkAuth);
+adminRouter.use(checkAdmin);
+
+/**
+ * ✅ Admin dashboard test
+ */
+adminRouter.get("/", (req, res) => {
   res.json({
     message: "Welcome Admin",
-    user: req.user,
+    admin: req.adminUser.username
   });
 });
-adminRouter.delete("/:id", checkAdmin, removeScan);
-adminRouter.post("/update-limit", checkAdmin, upgradeUserScan);
-adminRouter.get("/history", checkAdmin, getAllScanHistory);
-adminRouter.get("/:userId/history",checkAdmin,getUserScanHistoryAdmin);
+
+/**
+ * ✅ IMPORTANT: fixed route order
+ */
+adminRouter.get("/history", getAllScanHistory);
+adminRouter.get("/users/:userId/history", getUserScanHistoryAdmin);
+adminRouter.post("/update-limit", upgradeUserScan);
+adminRouter.delete("/scan/:id", removeScan);
 
 export default adminRouter;
-

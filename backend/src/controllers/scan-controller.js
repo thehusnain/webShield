@@ -179,7 +179,7 @@ export async function getScanHistory(req, res) {
   }
 }
 
-// ALL SCANS HISTORY
+// ALL SCANS HISTORY FOR ADMIN
 export async function getAllScanHistory(req, res) {
   try {
     const allScans = await Scan.find({}).sort({ createdAt: -1 }).lean();
@@ -254,7 +254,7 @@ export async function getScanResults(req, res) {
   }
 }
 
-// DELETING A SCAN
+// DELETING A SCAN (FOR ADMIN)
 export async function removeScan(req, res) {
   try {
     const scanId = req.params.id;
@@ -319,10 +319,6 @@ export async function upgradeUserScan(req, res) {
   try {
     const { userId, scanLimit } = req.body;
 
-    if (req.user.role !== "admin") {
-      return res.status(403).json({ error: "Admin access is required" });
-    }
-
     if (!userId) {
       return res.status(400).json({ error: "User ID is required" });
     }
@@ -351,6 +347,7 @@ export async function upgradeUserScan(req, res) {
   }
 }
 
+// GENERATING REPORT WITH GROQ AI 
 export const generateAIReportForScan = async (req, res) => {
   try {
     const scan = await Scan.findById(req.params.id);
