@@ -1,0 +1,51 @@
+
+===========================================
+     WEB SECURITY SCAN REPORT
+===========================================
+
+SCAN DETAILS:
+-------------
+Scan ID     : 694ad3c2bd3ae83e6d9103cb
+Target URL : https://yasirahmed.tech
+Scan Type  : NMAP
+Scan Time  : Tue Dec 23 2025 22:39:14 GMT+0500 (Pakistan Standard Time)
+
+===========================================
+         AI ANALYSIS REPORT
+===========================================
+
+Let's break down the scan results for the given URL.
+
+**1. Open Ports:**
+There are no open ports found on the target URL. This means that the nmap scan could not detect any open connections or services running on the server.
+
+**2. Common/Normal Ports:**
+Normal ports are usually used for common services like:
+
+- 80 (HTTP): This is the standard port for websites and web servers. It's like the main entrance to the website.
+- 443 (HTTPS): This is the secure version of the website, which uses encryption to protect user data.
+- 22 (SSH): This port is usually used for secure remote access to a server or computer.
+
+**3. Risky Ports:**
+Ports that might be considered risky are those that are often used for less secure services or are commonly targeted by hackers. Some examples include:
+
+- 21 (FTP): This port is used for file transfer protocol, which can be a security risk if not configured properly.
+- 23 (Telnet): This port is used for remote access to a server, but it's not as secure as SSH.
+
+**4. Safety of Open Ports:**
+Since there are no open ports found, it's safe to say that the target URL is not currently exposing any services that could be vulnerable to attacks.
+
+**5. Security Recommendations:**
+Based on the scan results, here are some simple security recommendations:
+
+- Make sure to keep your website and server software up to date, as newer versions often include security patches.
+- Use strong passwords and enable two-factor authentication to secure remote access to the server.
+- Consider using a web application firewall (WAF) to detect and block malicious traffic.
+- Regularly scan your server for vulnerabilities and apply necessary patches.
+
+Remember, security is an ongoing process, and you should always be monitoring and improving your defenses to stay protected.
+
+===========================================
+           END OF REPORT
+===========================================
+Report generated at: 12/23/2025, 10:39:37 PM

@@ -1,0 +1,33 @@
+
+===========================================
+     WEB SECURITY SCAN REPORT
+===========================================
+
+SCAN DETAILS:
+-------------
+Scan ID     : 694ad5363f4e802075b50d95
+Target URL : https://google.com
+Scan Type  : NMAP
+Scan Time  : Tue Dec 23 2025 22:45:26 GMT+0500 (Pakistan Standard Time)
+
+===========================================
+         AI ANALYSIS REPORT
+===========================================
+
+**SCAN RESULTS FOR TARGET URL: https://google.com**
+
+**OPEN PORTS:** 
+No open ports found
+
+**SAFETY STATUS:** Safe
+
+**RECOMMENDATIONS:**
+
+1. **Verify server settings**: Since no ports are open, it might indicate that the server is not configured to listen on any ports. Verify the server settings to ensure it's correctly configured.
+2. **Check firewall rules**: Ensure that the firewall is correctly configured to allow necessary ports for server services. If no ports are open, it might be due to restrictive firewall rules.
+3. **Review server services**: Since no ports are open, it's likely that the server is not running any services. Review the server services and configuration to determine why no ports are open.
+
+===========================================
+           END OF REPORT
+===========================================
+Report generated at: 12/23/2025, 10:45:44 PM

@@ -1,0 +1,42 @@
+
+WEB SECURITY SCAN REPORT
+=======================
+
+Scan ID     : 6948251bce4d0ca1c1117cc2
+Target URL : https://google.com
+Scan Type  : nmap
+Scan Time  : Sun Dec 21 2025 21:49:31 GMT+0500 (Pakistan Standard Time)
+
+----------------------------------------
+AI EXPLANATION (Simple Language)
+----------------------------------------
+
+Let me break down the scan results for you in simple terms.
+
+**What are Open Ports?**
+An open port is like a locked box (the website). When you try to access a website, your computer sends a message to the website asking if it can send something (like a letter) through a specific door (or port). If the door is locked (closed port), the website doesn't respond. If the door is open (open port), the website responds, allowing you to access what's inside.
+
+**Are Open Ports Normal or Risky?**
+Open ports are not inherently normal or risky. Most websites use several open ports for different services like displaying content, handling user requests, or providing security updates. These open ports are normal and necessary.
+
+**Which Ports Stay Open?**
+Some ports are always open on a website to support basic services like:
+
+- Port 80 (HTTP): For displaying website content
+- Port 443 (HTTPS): For secure website content and online transactions
+- Port 53 (DNS): For translating website addresses (like google.com) into IP addresses
+
+Other open ports might be specific to the website or its services, like a login system or a blog.
+
+**Simple Security Advice**
+Just because your website has open ports, it doesn't mean your website is insecure. However, having too many ports open or using outdated services can make you more vulnerable to cyber attacks. Consider:
+
+- Keeping your website software (content management systems) and plugins up-to-date.
+- Using strong passwords for login systems.
+- Limiting access to sensitive areas of your website.
+- Monitoring your website for suspicious activity.
+
+In this scan result, no open ports were found, which might be normal for some websites, especially if they're not actively serving services.
+
+----------------------------------------
+END OF REPORT

@@ -6,8 +6,8 @@ import {
   getScanHistory,
   getScanResults,
   cancelScan,
-  generateAIReportForScan,
 } from "../controllers/scan-controller.js";
+import { generateAIReportForScan } from "../controllers/aiReport-controller.js";
 
 const scanRouter = express.Router();
 scanRouter.use(checkAuth);

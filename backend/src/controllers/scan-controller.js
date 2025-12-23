@@ -12,8 +12,6 @@ import { scanWithSqlmap } from "../utils/scanners/sqlmap-scanner.js";
 import { scanWithSsl } from "../utils/scanners/ssl-scanner.js";
 import { urlValidation } from "../utils/validations/url-validation.js";
 import { checkDuplicateScan } from "../utils/validations/scan-validaton.js";
-import { aiReport } from "../utils/aiReport.js";
-import { generateTxtReport } from "../utils/reportFile-generator.js";
 
 //  STARTING A SCAN FUNCTION
 export async function startScan(req, res) {
@@ -154,14 +152,7 @@ export async function getScanHistory(req, res) {
         scanType: scan.scanType,
         status: scan.status,
         createdAt: scan.createdAt,
-
-        findings: {
-          openPorts: scan.results?.nmap?.openPorts || [],
-          hiddenDirectories: scan.results?.directories || [],
-          totalFindings:
-            (scan.results?.nmap?.openPorts?.length || 0) +
-            (scan.results?.directories?.length || 0),
-        },
+        message : "Result are in the Report"
       };
     });
 
@@ -347,65 +338,6 @@ export async function upgradeUserScan(req, res) {
   }
 }
 
-// GENERATING REPORT WITH GROQ AI 
-export const generateAIReportForScan = async (req, res) => {
-  try {
-    const scan = await Scan.findById(req.params.id);
-    if (!scan) return res.status(404).json({ error: "Scan not found" });
 
-    if (scan.reportFile) {
-      return res.json({
-        message: "Report already generated",
-        download: scan.reportFile
-      });
-    }
-
-    const summaryText = buildSummaryText(scan);
-    const aiText = await aiReport(summaryText);
-
-    const filePath = generateTxtReport(scan, aiText);
-
-    scan.reportFile = filePath;
-    await scan.save();
-
-    res.json({
-      message: "Report generated successfully",
-      download: filePath
-    });
-
-  } catch (err) {
-    res.status(500).json({ error: "Failed to generate report" });
-  }
-};
-
-function buildSummaryText(scan) {
-  let text = `
-Target URL: ${scan.targetUrl}
-Scan Tool: ${scan.scanType}
-Scan Time: ${scan.createdAt}
-
-Open Ports Found:
-`;
-
-  if (scan.results?.nmap?.openPorts?.length > 0) {
-    scan.results.nmap.openPorts.forEach(port => {
-      text += `- ${port}\n`;
-    });
-  } else {
-    text += "No open ports found.\n";
-  }
-
-  text += `
-Explain the above findings in SIMPLE language.
-Tell:
-- What these open ports mean
-- Which ports are risky
-- What should be closed
-- Simple recommendations
-Do NOT invent problems.
-`;
-
-  return text;
-}
 
 

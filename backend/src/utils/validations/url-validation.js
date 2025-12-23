@@ -2,6 +2,16 @@ export function urlValidation(url) {
   if (!url || url.trim() === "") {
     return { valid: false, error: "URL is required" };
   }
+   const parsed = new URL(url);
+
+    // allow localhost and private IPs for lab testing
+    if (
+      parsed.hostname === "localhost" ||
+      parsed.hostname === "127.0.0.1"
+    ) {
+      return { valid: true, url };
+    }
+
 
   const cleanUrl = url.trim();
   if ((cleanUrl.match(/\./g) || []).length > 2) {
