@@ -16,7 +16,6 @@ const passResetSchema = new mongoose.Schema(
     expiresAt: {
       type: Date,
       required: true,
-    // TOKEN WILL EXPIRE AFTER 10 MINUTES
       default: () => new Date(Date.now() + 10 * 60 * 1000),
     },
     used: {

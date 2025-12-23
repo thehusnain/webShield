@@ -3,8 +3,6 @@ export function urlValidation(url) {
     return { valid: false, error: "URL is required" };
   }
    const parsed = new URL(url);
-
-    // allow localhost and private IPs for lab testing
     if (
       parsed.hostname === "localhost" ||
       parsed.hostname === "127.0.0.1"

@@ -2,10 +2,8 @@ import { exec } from "child_process";
 import { promisify } from "util";
 import fs from "fs";
 
-const execAsync = promisify(exec);  // THIS LINE WAS MISSING!
+const execAsync = promisify(exec); 
 
-
-// In nikto-scanner.js, update to get better findings:
 export async function scanWithNikto(targetUrl) {
   try {
     const timestamp = Date.now();
@@ -24,7 +22,6 @@ export async function scanWithNikto(targetUrl) {
       throw new Error("Nikto output file not created");
     }
 
-    // Parse Nikto output better
     const lines = output.split("\n");
     const findings = [];
     let totalFindings = 0;

@@ -7,7 +7,7 @@ const emailUser = process.env.EMAIL_USER;
 const emailPass = process.env.EMAIL_PASSWORD;
 
 if (!emailUser || !emailPass) {
-  console.error("Email credentials missing! Check .env file");
+  console.error("Email credentials is missing");
 }
 
 const transporter = nodemailer.createTransport({

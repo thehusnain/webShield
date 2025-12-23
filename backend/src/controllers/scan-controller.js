@@ -101,19 +101,19 @@ export async function startScan(req, res) {
       let sqlmapResult = [];
 
       //   CHOOSING SCANTYPE
-      if (scanType === "nmap" || scanType === "full") {
+      if (scanType === "nmap") {
         console.log(`Starting Nmap scan for ${validation.url}`);
         nmapresult = await scanWithNmap(validation.url);
       }
-      if (scanType === "sqlmap" || scanType === "full") {
+      if (scanType === "sqlmap") {
         console.log(`Starting sqlMap scan for ${validation.url}`);
         sqlmapResult = await scanWithSqlmap(validation.url);
       }
-      if (scanType == "ssl" || scanType === "full") {
+      if (scanType == "ssl") {
         console.log(`Staring SSL Scan for: ${validation.url}`);
         sslResult = await scanWithSsl(validation.url);
       }
-      if (scanType == "nikto" || scanType === "full") {
+      if (scanType == "nikto") {
         console.log(`Staring Nikto Scan for: ${validation.url}`);
         niktoResult = await scanWithNikto(validation.url);
       }
@@ -152,7 +152,7 @@ export async function getScanHistory(req, res) {
         scanType: scan.scanType,
         status: scan.status,
         createdAt: scan.createdAt,
-        message : "Result are in the Report"
+        message : "Result are in the Report Route"
       };
     });
 
