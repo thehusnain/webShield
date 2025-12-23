@@ -31,7 +31,7 @@ IMPORTANT: Look at the "ACTUAL SCAN DATA" section and use ONLY that information.
                     content: summaryText
                 }
             ],
-            temperature: 0.3,  // Lower temperature = less creative, more factual
+            temperature: 0.3,  
             max_tokens: 800
         });
         return response.choices[0].message.content;

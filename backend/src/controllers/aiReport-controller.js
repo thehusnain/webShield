@@ -111,7 +111,6 @@ ACTUAL SCAN DATA:
         text += `- ${port}\n`;
       });
       
-      // Add port numbers list for easy reference
       const portNumbers = [];
       scan.results.nmap.openPorts.forEach(portLine => {
         const match = portLine.match(/^(\d+)\//);
@@ -175,7 +174,6 @@ ACTUAL SCAN DATA:
     if (scan.results.ssl.issues?.length > 0) {
       text += `SSL/TLS SECURITY ISSUES:\n`;
       scan.results.ssl.issues.forEach((issue, index) => {
-        // Clean up the issue text for readability
         const cleanIssue = issue.replace(/^\s*-\s*/, '').trim();
         text += `${index + 1}. ${cleanIssue}\n`;
       });
@@ -195,7 +193,6 @@ ACTUAL SCAN DATA:
     text += `Total Issues Found: NONE\n`;
     text += `No SSL/TLS vulnerabilities detected.\n`;
     
-    // Still show some basic info if scan was successful
     if (scan.results.ssl.rawOutput) {
       const lines = scan.results.ssl.rawOutput.split('\n');
       const tlsLine = lines.find(l => l.includes('TLSv1.2') || l.includes('TLSv1.3'));

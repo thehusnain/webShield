@@ -1,4 +1,3 @@
-// In ssl-scanner.js, update to get more detailed results:
 import { exec } from "child_process";
 import { promisify } from "util";
 

@@ -8,10 +8,10 @@ export async function scanWithNmap(targetUrl) {
     const url = new URL(targetUrl);
     const host = url.hostname;
     
-    // Use common web ports if no port specified
+
     const ports = "80,443,22,21,23,25,53,110,143,3389";
     
-    console.log(`Scanning ${host} on ports ${ports}`); // Debug log
+    console.log(`Scanning ${host} on ports ${ports}`);
     
     const { stdout, stderr } = await execAsync(
       `nmap -sT -sV -p ${ports} --open ${host}`
@@ -30,7 +30,7 @@ export async function scanWithNmap(targetUrl) {
       }
     });
     
-    console.log(`Found ${openPorts.length} open ports:`, openPorts); // Debug log
+    console.log(`Found ${openPorts.length} open ports:`, openPorts);
     
     return {
       tool: "nmap",
