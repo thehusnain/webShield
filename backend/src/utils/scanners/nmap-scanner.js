@@ -18,7 +18,7 @@ export async function scanWithNmap(targetUrl) {
     );
     
     if (stderr) {
-      console.error("Nmap stderr:", stderr);
+      console.error("Nmap stderror:", stderr);
     }
     
     const openPorts = [];
