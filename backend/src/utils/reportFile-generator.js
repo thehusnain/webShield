@@ -10,8 +10,7 @@ export async function generateTxtReport(scan, aiText) {
 
   const filePath = path.join(
     reportsDir,
-    `scan-report-${scan._id}.txt`
-  );
+    `scan-report-${scan._id}.txt`);
 
   const content = `
 
@@ -34,8 +33,7 @@ ${aiText}
 
           -- END OF REPORT --
 
-Report generated at: ${new Date().toLocaleString()}
-`;
+Report generated at: ${new Date().toLocaleString()}`;
 
   fs.writeFileSync(filePath, content, "utf8");
   return filePath;
