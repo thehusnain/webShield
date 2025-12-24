@@ -7,11 +7,7 @@ export async function checkDuplicateScan(userId, targetUrl, scanType) {
     scanType,
   });
   let normalizedUrl = targetUrl.toLowerCase();
-  normalizedUrl = normalizedUrl
-    .replace("https://", "")
-    .replace("http://", "")
-    .replace("www.", "")
-    .trim();
+  normalizedUrl = normalizedUrl.replace("https://", "").replace("http://", "").replace("www.", "").trim();
   const userScans = await Scan.find({
     userId: userId,
     scanType: scanType,
