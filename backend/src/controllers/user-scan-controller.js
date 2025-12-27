@@ -132,7 +132,7 @@ export async function startScan(req, res) {
         }
       });
 
-      console.log(`✅ Scan ${result._id} completed with results`);
+      console.log(`Scan ${result._id} completed with results`);
 
     } catch (scanError) {
       // HANDLE SCAN FAILURE

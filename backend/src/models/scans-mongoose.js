@@ -27,10 +27,6 @@ const scanSchema = new mongoose.Schema(
       ssl:  Object,
       sqlmap: Object,
     },
-    aiReport: {
-      type: String,
-      default: ""
-    },
     reportContent: {
       type: String,
       default: null
