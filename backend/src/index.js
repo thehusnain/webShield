@@ -6,7 +6,6 @@ import cookieParser from "cookie-parser";
 import scanRouter from "./routers/scans-router.js";
 import authRouter from "./routers/auth-router.js";
 import adminRouter from "./routers/admin-router.js";
-import path from 'path';
 import cors from "cors";
 dotenv.config();
 
@@ -14,11 +13,14 @@ const app = express();
 const port = process.env.PORT;
 app.use(cors({
   origin: process.env.FRONTEND_URL,
-  credentials: true
+  credentials: true,
+  methods: ['GET', 'POST', 'DELETE'], 
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  maxAge: 86400 
 }));
-app.use(express.json());
+app.use(express. json({ limit: '1mb' }));
+app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 app.use(cookieParser());
-app.use("/reports",express.static(path.join(process.cwd(), "reports")));
 
 connectDB();
 

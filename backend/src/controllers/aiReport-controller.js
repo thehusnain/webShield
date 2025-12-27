@@ -1,40 +1,283 @@
 import { aiReport } from "../utils/aiReport.js";
-import { generateTxtReport } from "../utils/reportFile-generator.js";
 import { Scan } from "../models/scans-mongoose.js";
-import { raw } from "express";
 
 // GENERATING REPORT WITH GROQ AI 
 export const generateAIReportForScan = async (req, res) => {
   try {
-    const scan = await Scan.findById(req.params.id);
-    if (!scan) return res.status(404).json({ error: "Scan not found" });
+    const scanId = req.params.id;
+    const userId = req.user.userId; // From auth middleware
 
-    if (scan.reportFile) {
-      return res.json({
-        message: "Report already generated",
-        download: scan.reportFile
+    // Find scan and verify ownership
+    const scan = await Scan.findOne({ _id: scanId, userId:  userId });
+    
+    if (!scan) {
+      return res. status(404).json({ 
+        success: false,
+        error: "Scan not found" 
       });
     }
 
+    // Check if scan is completed
+    if (scan.status !== 'completed') {
+      return res.status(400).json({
+        success: false,
+        error: "Scan is not completed yet",
+        status: scan.status
+      });
+    }
+
+    // Check if report already exists
+    if (scan.reportContent) {
+      return res.json({
+        success: true,
+        message: "Report already exists",
+        reportGenerated:  true,
+        generatedAt: scan.reportGeneratedAt,
+        scanId: scan._id
+      });
+    }
+
+    // Build summary text for AI
     const summaryText = buildSummaryText(scan);
+    
+    // Generate AI analysis
     const aiText = await aiReport(summaryText);
 
-    const filePath = generateTxtReport(scan, aiText);
+    // Build complete report content
+    const reportContent = buildReportContent(scan, aiText);
 
-    scan.reportFile = filePath;
+    // SAVE REPORT IN DATABASE (not file system!)
+    scan.reportContent = reportContent;
+    scan.reportGeneratedAt = new Date();
     await scan.save();
 
     res.json({
+      success: true,
       message: "Report generated successfully",
-      download: filePath
+      reportGenerated:  true,
+      generatedAt:  scan.reportGeneratedAt,
+      scanId: scan._id
     });
 
   } catch (err) {
     console.error("Report generation error:", err);
-    res.status(500).json({ error: "Failed to generate report" });
+    res.status(500).json({ 
+      success: false,
+      error: "Failed to generate report" 
+    });
   }
 };
 
+// OWNLOAD REPORT ENDPOINT
+export const downloadReport = async (req, res) => {
+  try {
+    const scanId = req.params.id;
+    const userId = req.user.userId;
+
+    // Find scan and verify ownership
+    const scan = await Scan.findOne({ _id: scanId, userId: userId });
+    
+    if (!scan) {
+      return res.status(404).json({ 
+        success: false,
+        error: "Scan not found" 
+      });
+    }
+
+    // Check if report exists
+    if (!scan. reportContent) {
+      return res.status(404).json({
+        success: false,
+        error: "Report not generated yet",
+        message: "Please generate the report first"
+      });
+    }
+
+    // Create a clean filename
+    const domain = new URL(scan.targetUrl).hostname;
+    const date = scan.reportGeneratedAt.toISOString().split('T')[0];
+    const filename = `WebShield_${scan.scanType}_${domain}_${date}.txt`;
+
+    // Send as downloadable file
+    res. setHeader('Content-Type', 'text/plain; charset=utf-8');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.send(scan.reportContent);
+
+  } catch (err) {
+    console.error("Report download error:", err);
+    res.status(500).json({ 
+      success: false,
+      error: "Failed to download report" 
+    });
+  }
+};
+
+// VIEW REPORT IN BROWSER (JSON)
+export const viewReport = async (req, res) => {
+  try {
+    const scanId = req.params.id;
+    const userId = req.user. userId;
+
+    const scan = await Scan.findOne({ _id: scanId, userId: userId });
+    
+    if (!scan) {
+      return res.status(404).json({ 
+        success: false,
+        error: "Scan not found" 
+      });
+    }
+
+    if (!scan.reportContent) {
+      return res.status(404).json({
+        success: false,
+        error: "Report not generated yet",
+        message:  "Please generate the report first"
+      });
+    }
+
+    res.json({
+      success: true,
+      report: {
+        scanId: scan._id,
+        targetUrl: scan.targetUrl,
+        scanType: scan.scanType,
+        scanDate: scan.createdAt,
+        generatedAt: scan.reportGeneratedAt,
+        content: scan.reportContent
+      }
+    });
+
+  } catch (err) {
+    console.error("Report view error:", err);
+    res.status(500).json({ 
+      success: false,
+      error: "Failed to retrieve report" 
+    });
+  }
+};
+
+// BUILD COMPLETE REPORT CONTENT
+function buildReportContent(scan, aiText) {
+  const divider = "=".repeat(70);
+  
+  return `
+${divider}
+           WEBSHIELD SECURITY SCAN REPORT
+${divider}
+
+SCAN INFORMATION:
+-----------------
+Scan ID        : ${scan._id}
+Target URL     : ${scan.targetUrl}
+Scan Type      : ${scan.scanType. toUpperCase()}
+Scan Date      : ${scan.createdAt.toLocaleString()}
+Report Date    : ${new Date().toLocaleString()}
+Status         : ${scan.status. toUpperCase()}
+
+${divider}
+           AI SECURITY ANALYSIS
+${divider}
+
+${aiText}
+
+${divider}
+           RAW SCAN RESULTS
+${divider}
+
+${buildRawResults(scan)}
+
+${divider}
+           END OF REPORT
+${divider}
+
+Generated by WebShield Security Scanner
+Report ID:  ${scan._id}
+© ${new Date().getFullYear()} WebShield - Your Website Security Partner
+
+DISCLAIMER: 
+This report is for educational purposes only. Always obtain proper 
+authorization before scanning any website or network.  Unauthorized 
+scanning may be illegal in your jurisdiction.
+
+${divider}
+`;
+}
+
+// BUILD RAW RESULTS SECTION
+function buildRawResults(scan) {
+  let results = '';
+
+  // NMAP RESULTS
+  if (scan.scanType === 'nmap' && scan.results?.nmap) {
+    results += `
+NMAP SCAN RESULTS: 
+------------------
+Open Ports: ${scan.results. nmap.openPorts?. length || 0}
+
+`;
+    if (scan.results.nmap.openPorts?.length > 0) {
+      results += scan.results.nmap. openPorts.join('\n');
+    } else {
+      results += 'No open ports detected';
+    }
+    results += '\n\nRaw Output:\n' + (scan.results.nmap.rawOutput || 'N/A');
+  }
+
+  // NIKTO RESULTS
+  if (scan.scanType === 'nikto' && scan.results?.nikto) {
+    results += `
+NIKTO SCAN RESULTS:
+-------------------
+Total Findings: ${scan.results.nikto.totalFindings || 0}
+
+`;
+    if (scan.results.nikto.findings?.length > 0) {
+      scan.results.nikto.findings. forEach((finding, i) => {
+        results += `${i + 1}. ${finding}\n`;
+      });
+    } else {
+      results += 'No vulnerabilities detected';
+    }
+  }
+
+  // SSL RESULTS
+  if (scan.scanType === 'ssl' && scan.results?.ssl) {
+    results += `
+SSL/TLS SCAN RESULTS:
+---------------------
+Total Issues: ${scan.results.ssl. totalIssues || 0}
+
+`;
+    if (scan.results.ssl.issues?.length > 0) {
+      scan.results.ssl.issues.forEach((issue, i) => {
+        results += `${i + 1}. ${issue}\n`;
+      });
+    } else {
+      results += 'No SSL/TLS issues detected';
+    }
+  }
+
+  // SQLMAP RESULTS
+  if (scan.scanType === 'sqlmap' && scan.results?.sqlmap) {
+    results += `
+SQLMAP SCAN RESULTS: 
+--------------------
+Vulnerable:  ${scan.results.sqlmap. vulnerable ? 'YES' : 'NO'}
+
+`;
+    if (scan.results. sqlmap.vulnerabilities?.length > 0) {
+      scan.results.sqlmap.vulnerabilities.forEach((vuln, i) => {
+        results += `${i + 1}. ${vuln}\n`;
+      });
+    } else {
+      results += 'No SQL injection vulnerabilities detected';
+    }
+  }
+
+  return results || 'No detailed results available';
+}
+
+//  BUILD SUMMARY TEXT FOR AI (Your existing function)
 function buildSummaryText(scan) {
   let text = `
 Target URL: ${scan.targetUrl}
@@ -45,9 +288,9 @@ SCAN RESULTS:
 =============
 `;
 
-//  NIKTO REPORT
-if (scan.scanType === "nikto") {
-  text += `
+  // NIKTO REPORT
+  if (scan.scanType === "nikto") {
+    text += `
 [WEB SERVER VULNERABILITY SCAN]
 Tool Used: Nikto
 Purpose: Checks for common web server security issues
@@ -55,60 +298,60 @@ Purpose: Checks for common web server security issues
 ACTUAL SCAN DATA:
 -----------------
 `;
-  
-  if (scan.results?.nikto?.totalFindings > 0) {
-    text += `Total Findings: ${scan.results.nikto.totalFindings} issues detected\n\n`;
     
-    if (scan.results.nikto.findings?.length > 0) {
-      text += `SAMPLE FINDINGS (${Math.min(5, scan.results.nikto.findings.length)} of ${scan.results.nikto.totalFindings}):\n`;
-      scan.results.nikto.findings.slice(0, 5).forEach((finding, index) => {
-        text += `${index + 1}. ${finding}\n`;
-      });
+    if (scan. results?. nikto?.totalFindings > 0) {
+      text += `Total Findings: ${scan.results. nikto.totalFindings} issues detected\n\n`;
+      
+      if (scan.results.nikto. findings?.length > 0) {
+        text += `SAMPLE FINDINGS (${Math.min(5, scan.results.nikto. findings.length)} of ${scan.results.nikto.totalFindings}):\n`;
+        scan.results.nikto.findings.slice(0, 5).forEach((finding, index) => {
+          text += `${index + 1}. ${finding}\n`;
+        });
+      }
+      
+      text += `\nScan completed:  ${scan.results.nikto. success ? 'Successfully' : 'With errors'}\n`;
+    } else {
+      text += `Total Findings: NO issues detected\n`;
+      text += `Nikto found no common web server vulnerabilities.\n`;
     }
-    
-    text += `\nScan completed: ${scan.results.nikto.success ? 'Successfully' : 'With errors'}\n`;
-  } else {
-    text += `Total Findings: NO issues detected\n`;
-    text += `Nikto found no common web server vulnerabilities.\n`;
-  }
 
-  text += `
+    text += `
 
-IMPORTANT INSTRUCTIONS FOR AI:
+IMPORTANT INSTRUCTIONS FOR AI: 
 --------------------------------
 1. Look at the ACTUAL SCAN DATA above
 2. If findings are listed, explain WHAT THEY MEAN in simple terms
 3. If no findings, say "No web vulnerabilities detected"
-4. For each type of finding, explain:
+4. For each type of finding, explain: 
    - What it is (e.g., "outdated software", "misconfiguration")
    - How serious it is (Low/Medium/High risk)
    - If it's common or rare
-5. Give a clear safety assessment: "Safe" or "Vulnerabilities found"
+5. Give a clear safety assessment:  "Safe" or "Vulnerabilities found"
 6. Give 3 simple recommendations for fixing issues
 7. DO NOT talk about ports, SSL, or SQL injection
 8. Focus ONLY on web server security issues
-9. Format like this:
+9. Format like this: 
 
-   FINDINGS SUMMARY: [number and type]
+   FINDINGS SUMMARY:  [number and type]
    RISK LEVEL: [Low/Medium/High]
    SAFETY STATUS: [Safe/Vulnerable]
    RECOMMENDATIONS: [3 simple tips]
 10. Use bullet points and very simple language
 `;
-}
+  }
 
-    // NMAP REPORT
+  // NMAP REPORT
   if (scan.scanType === "nmap") {
     text += `
-Tool: Nmap (Network Mapper)
+Tool:  Nmap (Network Mapper)
 Purpose: Checks which network ports are open on your server
 
-ACTUAL SCAN DATA:
+ACTUAL SCAN DATA: 
 -----------------
 `;
     
     if (scan.results?.nmap?.openPorts?.length > 0) {
-      text += `Open Ports Found (${scan.results.nmap.openPorts.length}):\n`;
+      text += `Open Ports Found (${scan.results.nmap. openPorts.length}):\n`;
       scan.results.nmap.openPorts.forEach(port => {
         text += `- ${port}\n`;
       });
@@ -124,14 +367,14 @@ ACTUAL SCAN DATA:
       }
       
       text += `\nFull scan output (first 10 lines):\n`;
-      if (scan.results.nmap.rawOutput) {
+      if (scan.results.nmap. rawOutput) {
         const lines = scan.results.nmap.rawOutput.split('\n').slice(0, 10);
         text += lines.join('\n');
       }
     } else {
-      text += `Open Ports: NONE FOUND\n`;
+      text += `Open Ports:  NONE FOUND\n`;
       text += `The scan detected NO open ports on your server.\n`;
-      text += `Target May block scans, or allow only HTTPS`
+      text += `Target may block scans, or allow only HTTPS\n`;
     }
 
     text += `
@@ -151,68 +394,67 @@ IMPORTANT INSTRUCTIONS FOR AI:
 8. Use bullet points and simple language
 9. Format like this:
    
-   OPEN PORTS: [list them]
+   OPEN PORTS:  [list them]
    COMMON PORTS: [explain]
-   RISKY PORTS: [if any]
-   SAFETY STATUS: [safe/unsafe]
-   RECOMMENDATIONS: [3 simple tips]
+   RISKY PORTS:  [if any]
+   SAFETY STATUS:  [safe/unsafe]
+   RECOMMENDATIONS:  [3 simple tips]
 `;
   }
 
-
-//   sslscan REPORT
-if (scan.scanType === "ssl") {
-  text += `
+  // SSL REPORT
+  if (scan.scanType === "ssl") {
+    text += `
 [SSL/TLS ENCRYPTION SECURITY SCAN]
 Tool Used: SSLScan
 Purpose: Checks website encryption strength and SSL/TLS vulnerabilities
 
-ACTUAL SCAN DATA:
+ACTUAL SCAN DATA: 
 -----------------
 `;
-  
-  if (scan.results?.ssl?.totalIssues > 0) {
-    text += `Total Issues Found: ${scan.results.ssl.totalIssues}\n\n`;
     
-    if (scan.results.ssl.issues?.length > 0) {
-      text += `SSL/TLS SECURITY ISSUES:\n`;
-      scan.results.ssl.issues.forEach((issue, index) => {
-        const cleanIssue = issue.replace(/^\s*-\s*/, '').trim();
-        text += `${index + 1}. ${cleanIssue}\n`;
-      });
-    }
-    
-    // Add certificate info if available
-    if (scan.results.ssl.rawOutput) {
-      const lines = scan.results.ssl.rawOutput.split('\n');
-      const certLine = lines.find(l => l.includes('Subject:'));
-      const expiryLine = lines.find(l => l.includes('Not After:'));
+    if (scan.results?.ssl?.totalIssues > 0) {
+      text += `Total Issues Found: ${scan.results.ssl. totalIssues}\n\n`;
       
-      if (certLine) text += `\nCertificate: ${certLine.trim()}\n`;
-      if (expiryLine) text += `Expires: ${expiryLine.trim().replace('Not After:', '').trim()}\n`;
+      if (scan.results.ssl. issues?.length > 0) {
+        text += `SSL/TLS SECURITY ISSUES:\n`;
+        scan.results.ssl.issues.forEach((issue, index) => {
+          const cleanIssue = issue.replace(/^\s*-\s*/, '').trim();
+          text += `${index + 1}. ${cleanIssue}\n`;
+        });
+      }
+      
+      // Add certificate info if available
+      if (scan. results.ssl.rawOutput) {
+        const lines = scan.results.ssl.rawOutput.split('\n');
+        const certLine = lines.find(l => l.includes('Subject: '));
+        const expiryLine = lines.find(l => l.includes('Not After:'));
+        
+        if (certLine) text += `\nCertificate:  ${certLine.trim()}\n`;
+        if (expiryLine) text += `Expires: ${expiryLine.trim().replace('Not After:', '').trim()}\n`;
+      }
+      
+    } else if (scan.results?.ssl?.success === true) {
+      text += `Total Issues Found:  NONE\n`;
+      text += `No SSL/TLS vulnerabilities detected.\n`;
+      
+      if (scan.results.ssl. rawOutput) {
+        const lines = scan.results.ssl.rawOutput.split('\n');
+        const tlsLine = lines.find(l => l.includes('TLSv1.2') || l.includes('TLSv1.3'));
+        if (tlsLine) text += `\nSupported Protocol: ${tlsLine.trim()}\n`;
+      }
+    } else {
+      text += `Scan Status: Failed or incomplete\n`;
+      text += `Could not complete SSL/TLS security check.\n`;
     }
-    
-  } else if (scan.results?.ssl?.success === true) {
-    text += `Total Issues Found: NONE\n`;
-    text += `No SSL/TLS vulnerabilities detected.\n`;
-    
-    if (scan.results.ssl.rawOutput) {
-      const lines = scan.results.ssl.rawOutput.split('\n');
-      const tlsLine = lines.find(l => l.includes('TLSv1.2') || l.includes('TLSv1.3'));
-      if (tlsLine) text += `\nSupported Protocol: ${tlsLine.trim()}\n`;
-    }
-  } else {
-    text += `Scan Status: Failed or incomplete\n`;
-    text += `Could not complete SSL/TLS security check.\n`;
-  }
 
-  text += `
+    text += `
 
 IMPORTANT INSTRUCTIONS FOR AI:
 --------------------------------
 1. Look at the ACTUAL SCAN DATA above
 2. Focus ONLY on SSL/TLS encryption security
-3. Explain findings in SIMPLE terms:
+3. Explain findings in SIMPLE terms: 
    - What SSL/TLS is (like a "secure envelope" for data)
    - What weak protocols mean (SSLv3, TLS 1.0, TLS 1.1)
    - What strong protocols mean (TLS 1.2, TLS 1.3)
@@ -220,10 +462,10 @@ IMPORTANT INSTRUCTIONS FOR AI:
    - What it means in simple language
    - Why it's dangerous (e.g., "can be hacked by attackers")
    - How serious it is (Critical/High/Medium/Low)
-5. If no issues found, explain:
+5. If no issues found, explain: 
    - What good SSL/TLS looks like
    - Why it's important for security
-6. Give clear safety assessment:
+6. Give clear safety assessment: 
    - "Secure" (if TLS 1.2/1.3 only, no weak protocols)
    - "Needs improvement" (if mixed protocols)
    - "Insecure" (if SSLv3 or very weak encryption)
@@ -237,81 +479,81 @@ IMPORTANT INSTRUCTIONS FOR AI:
    RECOMMENDATIONS: [3 simple tips]
 10. Use very simple analogies (like "lock on a door", "secure envelope")
 `;
-}
+  }
 
-// SQL MAP REPORT
-if (scan.scanType === "sqlmap") {
-  text += `
+  // SQLMAP REPORT
+  if (scan.scanType === "sqlmap") {
+    text += `
 [DATABASE SECURITY SCAN]
 Tool Used: SQLMap
 Purpose: Checks for SQL injection vulnerabilities in websites
 
-ACTUAL SCAN DATA:
+ACTUAL SCAN DATA: 
 -----------------
 `;
-  
-  // Show vulnerability status
-  if (scan.results?.sqlmap?.vulnerable === true) {
-    text += `RESULT: POTENTIAL SQL INJECTION VULNERABILITY FOUND\n\n`;
     
-    if (scan.results.sqlmap.vulnerabilities?.length > 0) {
-      text += `VULNERABILITIES DETECTED:\n`;
-      scan.results.sqlmap.vulnerabilities.forEach((vuln, index) => {
-        text += `${index + 1}. ${vuln}\n`;
-      });
+    // Show vulnerability status
+    if (scan.results?. sqlmap?.vulnerable === true) {
+      text += `RESULT: POTENTIAL SQL INJECTION VULNERABILITY FOUND\n\n`;
+      
+      if (scan.results.sqlmap. vulnerabilities?.length > 0) {
+        text += `VULNERABILITIES DETECTED:\n`;
+        scan.results.sqlmap.vulnerabilities.forEach((vuln, index) => {
+          text += `${index + 1}. ${vuln}\n`;
+        });
+      } else {
+        text += `The scan detected possible SQL injection points.\n`;
+      }
+      
+      // Add type of injection if available
+      if (scan.results.sqlmap.rawOutput) {
+        const lines = scan.results.sqlmap.rawOutput.split('\n');
+        const injectionTypes = lines.filter(l => 
+          l.includes('injection') || 
+          l.includes('Parameter') ||
+          l.includes('payload')
+        ).slice(0, 3);
+        
+        if (injectionTypes.length > 0) {
+          text += `\nDETAILS:\n`;
+          injectionTypes.forEach(line => {
+            text += `- ${line.trim()}\n`;
+          });
+        }
+      }
+      
+    } else if (scan.results?.sqlmap?. success === true) {
+      text += `RESULT: NO SQL INJECTION VULNERABILITIES DETECTED\n\n`;
+      text += `The website appears secure against SQL injection attacks.\n`;
+      
+      // Still show scan completion info
+      if (scan.results. sqlmap.rawOutput) {
+        const lines = scan.results. sqlmap.rawOutput.split('\n');
+        const safeLines = lines.filter(l => 
+          l.includes('all tested') || 
+          l.includes('not vulnerable') ||
+          l.includes('clean')
+        );
+        
+        if (safeLines.length > 0) {
+          text += `\nSCAN VERIFICATION:\n`;
+          safeLines.slice(0, 2).forEach(line => {
+            text += `- ${line.trim()}\n`;
+          });
+        }
+      }
+      
     } else {
-      text += `The scan detected possible SQL injection points.\n`;
-    }
-    
-    // Add type of injection if available
-    if (scan.results.sqlmap.rawOutput) {
-      const lines = scan.results.sqlmap.rawOutput.split('\n');
-      const injectionTypes = lines.filter(l => 
-        l.includes('injection') || 
-        l.includes('Parameter') ||
-        l.includes('payload')
-      ).slice(0, 3);
-      
-      if (injectionTypes.length > 0) {
-        text += `\nDETAILS:\n`;
-        injectionTypes.forEach(line => {
-          text += `- ${line.trim()}\n`;
-        });
+      text += `RESULT: SCAN INCOMPLETE OR FAILED\n\n`;
+      text += `Could not complete SQL injection security check.\n`;
+      if (scan.results?. sqlmap?.error) {
+        text += `Error: ${scan.results.sqlmap.error}\n`;
       }
     }
-    
-  } else if (scan.results?.sqlmap?.success === true) {
-    text += `RESULT: NO SQL INJECTION VULNERABILITIES DETECTED\n\n`;
-    text += `The website appears secure against SQL injection attacks.\n`;
-    
-    // Still show scan completion info
-    if (scan.results.sqlmap.rawOutput) {
-      const lines = scan.results.sqlmap.rawOutput.split('\n');
-      const safeLines = lines.filter(l => 
-        l.includes('all tested') || 
-        l.includes('not vulnerable') ||
-        l.includes('clean')
-      );
-      
-      if (safeLines.length > 0) {
-        text += `\nSCAN VERIFICATION:\n`;
-        safeLines.slice(0, 2).forEach(line => {
-          text += `- ${line.trim()}\n`;
-        });
-      }
-    }
-    
-  } else {
-    text += `RESULT: SCAN INCOMPLETE OR FAILED\n\n`;
-    text += `Could not complete SQL injection security check.\n`;
-    if (scan.results?.sqlmap?.error) {
-      text += `Error: ${scan.results.sqlmap.error}\n`;
-    }
-  }
 
-  text += `
+    text += `
 
-IMPORTANT INSTRUCTIONS FOR AI:
+IMPORTANT INSTRUCTIONS FOR AI: 
 --------------------------------
 1. Look at the ACTUAL SCAN DATA above
 2. Focus ONLY on SQL injection database security
@@ -342,7 +584,7 @@ IMPORTANT INSTRUCTIONS FOR AI:
     IMMEDIATE ACTIONS: [What to do now]
     RECOMMENDATIONS: [3-4 simple tips]
 `;
-}
+  }
 
   return text;
 }

@@ -1,43 +1,57 @@
 import { Scan } from "../../models/scans-mongoose.js";
 
-export async function checkDuplicateScan(userId, targetUrl, scanType) {
-  console.log("Checking duplicate for USER:", {
-    userId: String(userId).substring(0, 10) + "...",
-    targetUrl,
-    scanType,
-  });
-  let normalizedUrl = targetUrl.toLowerCase();
-  normalizedUrl = normalizedUrl.replace("https://", "").replace("http://", "").replace("www.", "").trim();
-  const userScans = await Scan.find({
-    userId: userId,
-    scanType: scanType,
-  }).sort({ createdAt: -1 });
-
-  console.log(`User has ${userScans.length} scans of type ${scanType}`);
-
-  for (const scan of userScans) {
-    let scanUrl = scan.targetUrl.toLowerCase();
-    scanUrl = scanUrl
-      .replace("https://", "")
-      .replace("http://", "")
-      .replace("www.", "")
+export async function getScanStatistics(userId, targetUrl, scanType) {
+  try {
+    // Normalize the URL for comparison
+    let normalizedUrl = targetUrl.toLowerCase();
+    normalizedUrl = normalizedUrl
+      .replace(/^https?:\/\//, "")
+      .replace(/^www\. /, "")
+      .replace(/\/$/, "") 
       .trim();
 
-    if (scanUrl === normalizedUrl) {
-      console.log("User already scanned this URL!");
-      return {
-        isDuplicate: true,
-        message: `You already scanned ${scan.targetUrl} with ${scanType} scan`,
-        previousScan: {
-          scanId: scan._id,
-          status: scan.status,
-          scannedAt: scan.createdAt,
-          targetUrl: scan.targetUrl,
-        },
-      };
-    }
-  }
+    // Get all user's scans of this type
+    const userScans = await Scan.find({
+      userId: userId,
+      scanType: scanType,
+    }).sort({ createdAt: -1 });
 
-  console.log("No duplicate found for this user");
-  return { isDuplicate: false };
+    console.log(`User has ${userScans.length} total scans of type ${scanType}`);
+
+    // Count scans for this specific URL
+    let urlScanCount = 0;
+    let lastScanDate = null;
+
+    for (const scan of userScans) {
+      let scanUrl = scan.targetUrl. toLowerCase();
+      scanUrl = scanUrl
+        .replace(/^https?:\/\//, "")
+        .replace(/^www\./, "")
+        .replace(/\/$/, "")
+        .trim();
+
+      if (scanUrl === normalizedUrl) {
+        urlScanCount++;
+        if (!lastScanDate || scan.createdAt > lastScanDate) {
+          lastScanDate = scan.createdAt;
+        }
+      }
+    }
+
+    return {
+      totalScansOfType: userScans.length,
+      urlScanCount:  urlScanCount, 
+      lastScanDate:  lastScanDate,
+      message: `User has ${userScans.length} ${scanType} scans total, ${urlScanCount} for this URL`
+    };
+
+  } catch (error) {
+    console.error("Scan statistics error:", error);
+    return {
+      totalScansOfType: 0,
+      urlScanCount: 0,
+      lastScanDate: null,
+      message: "Could not retrieve scan statistics"
+    };
+  }
 }

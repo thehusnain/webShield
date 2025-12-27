@@ -3,9 +3,9 @@ import mongoose from "mongoose";
 const scanSchema = new mongoose.Schema(
   {
     userId: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: mongoose.Schema. Types.ObjectId,
       ref: "User",
-      required: true,
+      required:  true,
     },
     targetUrl: {
       type: String,
@@ -16,7 +16,7 @@ const scanSchema = new mongoose.Schema(
       enum: ["nmap", "sqlmap", "ssl", "nikto"],
       default: "full",
     },
-    status: {
+    status:  {
       type: String,
       enum: ["pending", "running", "completed", "failed", "cancelled"],
       default: "pending",
@@ -24,18 +24,30 @@ const scanSchema = new mongoose.Schema(
     results: {
       nmap: Object,
       nikto: Object,
-      ssl: Object,
-      sqlmap: Array,
+      ssl:  Object,
+      sqlmap: Object,
     },
-    aiReport : {
-      type : String,
-      default : ""
-
+    aiReport: {
+      type: String,
+      default: ""
+    },
+    reportContent: {
+      type: String,
+      default: null
+    },
+    reportGeneratedAt: {
+      type:  Date,
+      default: null
     }
   },
   {
     timestamps: true,
   }
 );
+
+// Indexes
+scanSchema.index({ userId: 1, createdAt: -1 });
+scanSchema.index({ status: 1 });
+scanSchema.index({ userId: 1, status: 1 });
 
 export const Scan = mongoose.model("Scan", scanSchema);

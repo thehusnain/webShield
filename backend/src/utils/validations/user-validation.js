@@ -28,24 +28,37 @@ export async function signUpValidation(req, res, next) {
 }
 
 export async function loginValidation(req, res, next) {
-  const { emailOrUsername, password } = req.body;
-  if (!emailOrUsername) {
+  // Accept email, username, or emailOrUsername
+  const identifier = req.body.emailOrUsername || req.body.email || req.body.username;
+  const password = req.body.password;
+
+  if (!identifier) {
     return res.status(400).json({
+      success: false,
       error: "Email or username is required",
     });
   }
 
+  if (!password) {
+    return res.status(400).json({
+      success: false,
+      error: "Password is required",
+    });
+  }
+
   const passwordRegex =
-    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?])[A-Za-z\d!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]{8,}$/;
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[! @#$%^&*()_+\-=\[\]{};':"\\|,. <>\/?])[A-Za-z\d!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/? ]{8,}$/;
+  
   const validPassword = passwordRegex.test(password);
 
   if (validPassword) {
     next();
   } else {
     res.status(400).json({
+      success: false,
       error: "Invalid password format",
-      details:
-        "Password must contain: 8+ chars, uppercase, lowercase, number, special character",
+      details: 
+        "Password must contain:  8+ chars, uppercase, lowercase, number, special character",
     });
   }
 }
