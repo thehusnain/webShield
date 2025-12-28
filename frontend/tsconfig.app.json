@@ -23,7 +23,7 @@
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": false,
     "noUncheckedSideEffectImports": true,
-    "type": ["node"]
+    "forceConsistentCasingInFileNames": true
   },
   "include": ["src"]
 }
