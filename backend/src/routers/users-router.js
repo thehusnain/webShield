@@ -108,71 +108,65 @@ userRouter.post("/login", loginValidation, async (req, res) => {
 });
 
 // PROFILE ROUTE
-userRouter.get("/profile", checkAuth, async (req, res) => {
+// GET USER PROFILE
+userRouter.get('/profile', verifyUser, async (req, res) => {
   try {
-    console.log("=== PROFILE REQUEST ===");
-    console.log("User ID:", req.user.userId);
-
-    const user = await User.findById(req.user.userId);
-
+    const userId = req.userId;
+    
+    const user = await User.findById(userId).select('-password');
+    
     if (!user) {
-      console.log("User not found");
       return res.status(404).json({
         success: false,
-        error: "User not found",
+        error: 'User not found'
       });
     }
 
-    console.log("Profile retrieved for:", user.username);
-
     res.json({
       success: true,
-      message: "Profile retrieved successfully",
       user: {
         _id: user._id,
         userId: user._id,
-        username: user.username,
-        email: user.email,
-        role: user.role,
-        scanLimit: user.scanLimit || 10,
-        scansUsed: user.usedScan || 0,
-        scansRemaining: (user.scanLimit || 10) - (user.usedScan || 0),
-        createdAt: user.createdAt,
-      },
+        username: user. username,
+        email: user. email,
+        role: user. role,
+        scanLimit: user.scanLimit,
+        scansUsed: user.scansUsed,
+        agreedToTerms: user.agreedToTerms || false,  
+        createdAt: user. createdAt
+      }
     });
   } catch (error) {
-    console.error(" Profile error:", error.message);
+    console.error('Get profile error:', error);
     res.status(500).json({
       success: false,
-      error: "Failed to retrieve profile",
+      error:  'Failed to get profile'
     });
   }
 });
-
 // LOGOUT ROUTE
-userRouter.post("/logout", (req, res) => {
+// LOGOUT ROUTE
+userRouter.post('/logout', async (req, res) => {
   try {
-    console.log("=== LOGOUT REQUEST ===");
-
-    // Clear cookie
-    res.clearCookie("token", {
+    console.log('[Logout] Clearing cookie');
+    
+    
+    res.clearCookie('token', {
       httpOnly: true,
-      secure: false,
-      sameSite: "lax",
-      path: "/",
+      secure:  process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      path: '/',
     });
-
-    console.log(" Logout successful, cookie cleared");
 
     res.json({
       success: true,
-      message: "Logged out successfully",
+      message: 'Logged out successfully'
     });
   } catch (error) {
-    console.error("Logout error:", error.message);
+    console.error('[Logout] Error:', error);
     res.status(500).json({
       success: false,
-      error: "Logout failed",
+      error: 'Logout failed'
     });
   }
 });
