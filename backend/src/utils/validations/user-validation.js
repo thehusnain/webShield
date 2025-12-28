@@ -1,7 +1,7 @@
 export async function signUpValidation(req, res, next) {
   const { email, password, username } = req.body;
 
-   const emailRegex = /^[a-zA-Z0-9][a-zA-Z0-9._-]{2,}@[a-zA-Z0-9][a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  const emailRegex = /^[a-zA-Z0-9][a-zA-Z0-9._-]{2,}@[a-zA-Z0-9][a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
   const validEmail = emailRegex.test(email);
   const passwordRegex =
     /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?])[A-Za-z\d!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]{8,}$/;
@@ -10,18 +10,15 @@ export async function signUpValidation(req, res, next) {
 
   if (validEmail && validPassword && validUsername) {
     next();
-
   } else {
     res.status(400).json({
-      error: "Invalid user data",
+      error: 'Invalid user data',
       details: {
-        email: validEmail ? "Valid" : "Invalid email format",
+        email: validEmail ? 'Valid' : 'Invalid email format',
         password: validPassword
-          ? "Valid"
-          : "Password must contain: 8+ characters, uppercase, lowercase, Number, Special character",
-        username: validUsername
-          ? "Valid"
-          : "Username must be at least 3 characters",
+          ? 'Valid'
+          : 'Password must contain: 8+ characters, uppercase, lowercase, Number, Special character',
+        username: validUsername ? 'Valid' : 'Username must be at least 3 characters',
       },
     });
   }
@@ -35,20 +32,20 @@ export async function loginValidation(req, res, next) {
   if (!identifier) {
     return res.status(400).json({
       success: false,
-      error: "Email or username is required",
+      error: 'Email or username is required',
     });
   }
 
   if (!password) {
     return res.status(400).json({
       success: false,
-      error: "Password is required",
+      error: 'Password is required',
     });
   }
 
   const passwordRegex =
     /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[! @#$%^&*()_+\-=\[\]{};':"\\|,. <>\/?])[A-Za-z\d!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/? ]{8,}$/;
-  
+
   const validPassword = passwordRegex.test(password);
 
   if (validPassword) {
@@ -56,9 +53,8 @@ export async function loginValidation(req, res, next) {
   } else {
     res.status(400).json({
       success: false,
-      error: "Invalid password format",
-      details: 
-        "Password must contain:  8+ chars, uppercase, lowercase, number, special character",
+      error: 'Invalid password format',
+      details: 'Password must contain:  8+ chars, uppercase, lowercase, number, special character',
     });
   }
 }

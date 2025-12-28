@@ -1,6 +1,6 @@
-import { User } from "../models/users-mongoose.js";
-import { Scan } from "../models/scans-mongoose.js";
-// import { deleteScan } from "../models/scans-model.js";
+import { User } from '../models/users-mongoose.js';
+import { Scan } from '../models/scans-mongoose.js';
+
 
 // ALL SCANS HISTORY FOR ADMIN
 export async function getAllScanHistory(req, res) {
@@ -9,7 +9,7 @@ export async function getAllScanHistory(req, res) {
 
     res.json({
       success: true,
-      message: "All scan history retrieved",
+      message: 'All scan history retrieved',
       totalScans: allScans.length,
       scans: allScans,
     });
@@ -26,14 +26,12 @@ export async function getUserScanHistoryAdmin(req, res) {
   try {
     const userId = req.params.userId;
     const scans = await Scan.find({ userId: userId }).sort({ createdAt: -1 });
-    const user = await User.findById(userId).select(
-      "username email role scanLimit"
-    );
+    const user = await User.findById(userId).select('username email role scanLimit');
 
     if (!user) {
       return res.status(404).json({
         success: false,
-        error: "User not found",
+        error: 'User not found',
       });
     }
 
@@ -63,14 +61,13 @@ export async function removeScan(req, res) {
     const scanId = req.params.id;
 
     const deletedScan = await Scan.findByIdAndDelete(scanId);
-    
+
     if (!deletedScan) {
-      return res.status(404).json({ error: "Scan not found" });
+      return res.status(404).json({ error: 'Scan not found' });
     }
 
-
     res.json({
-      message: "Scan deleted successfully",
+      message: 'Scan deleted successfully',
       deletedScanId: scanId,
     });
   } catch (error) {
@@ -84,7 +81,7 @@ export async function upgradeUserScan(req, res) {
     const { userId, scanLimit } = req.body;
 
     if (!userId) {
-      return res.status(400).json({ error: "User ID is required" });
+      return res.status(400).json({ error: 'User ID is required' });
     }
 
     const updatedUser = await User.findByIdAndUpdate(
@@ -94,12 +91,12 @@ export async function upgradeUserScan(req, res) {
     );
 
     if (!updatedUser) {
-      return res.status(404).json({ error: "User not found" });
+      return res.status(404).json({ error: 'User not found' });
     }
 
     res.json({
       success: true,
-      message: "User scan limit updated successfully",
+      message: 'User scan limit updated successfully',
       user: {
         userId: updatedUser._id,
         username: updatedUser.username,
@@ -121,21 +118,21 @@ export async function getAdminStats(req, res) {
 
     // Get active scans (running or pending)
     const activeScans = await Scan.countDocuments({
-      status: { $in: ["pending", "running"] },
+      status: { $in: ['pending', 'running'] },
     });
 
     // Get recent users (last 5)
     const recentUsers = await User.find()
       .sort({ createdAt: -1 })
       .limit(5)
-      .select("username email role createdAt")
+      .select('username email role createdAt')
       .lean();
 
     // Get recent scans (last 5)
     const recentScans = await Scan.find()
       .sort({ createdAt: -1 })
       .limit(5)
-      .select("targetUrl scanType status createdAt")
+      .select('targetUrl scanType status createdAt')
       .lean();
 
     res.json({
@@ -147,10 +144,10 @@ export async function getAdminStats(req, res) {
       recentScans,
     });
   } catch (error) {
-    console.error("Admin stats error:", error);
+    console.error('Admin stats error:', error);
     return res.status(500).json({
       success: false,
-      error: "Failed to fetch admin statistics",
+      error: 'Failed to fetch admin statistics',
     });
   }
 }

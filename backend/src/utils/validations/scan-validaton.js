@@ -1,13 +1,14 @@
-import { Scan } from "../../models/scans-mongoose.js";
+import { Scan } from '../../models/scans-mongoose.js';
 
 export async function getScanStatistics(userId, targetUrl, scanType) {
   try {
     // Normalize the URL for comparison
     let normalizedUrl = targetUrl.toLowerCase();
     normalizedUrl = normalizedUrl
-      .replace(/^https?:\/\//, "")
-      .replace(/^www\. /, "")
-      .replace(/\/$/, "") 
+      .replace(/^https?:\/\//, '')
+      .replace(/^http?:\/\//, '')
+      .replace(/^www\. /, '')
+      .replace(/\/$/, '')
       .trim();
 
     // Get all user's scans of this type
@@ -23,11 +24,12 @@ export async function getScanStatistics(userId, targetUrl, scanType) {
     let lastScanDate = null;
 
     for (const scan of userScans) {
-      let scanUrl = scan.targetUrl. toLowerCase();
+      let scanUrl = scan.targetUrl.toLowerCase();
       scanUrl = scanUrl
-        .replace(/^https?:\/\//, "")
-        .replace(/^www\./, "")
-        .replace(/\/$/, "")
+        .replace(/^https?:\/\//, '')
+        .replace(/^http?:\/\//, '')
+        .replace(/^www\./, '')
+        .replace(/\/$/, '')
         .trim();
 
       if (scanUrl === normalizedUrl) {
@@ -40,18 +42,17 @@ export async function getScanStatistics(userId, targetUrl, scanType) {
 
     return {
       totalScansOfType: userScans.length,
-      urlScanCount:  urlScanCount, 
-      lastScanDate:  lastScanDate,
-      message: `User has ${userScans.length} ${scanType} scans total, ${urlScanCount} for this URL`
+      urlScanCount: urlScanCount,
+      lastScanDate: lastScanDate,
+      message: `User has ${userScans.length} ${scanType} scans total, ${urlScanCount} for this URL`,
     };
-
   } catch (error) {
-    console.error("Scan statistics error:", error);
+    console.error('Scan statistics error:', error);
     return {
       totalScansOfType: 0,
       urlScanCount: 0,
       lastScanDate: null,
-      message: "Could not retrieve scan statistics"
+      message: 'Could not retrieve scan statistics',
     };
   }
 }

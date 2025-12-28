@@ -1,5 +1,5 @@
-import nodemailer from "nodemailer";
-import dotenv from "dotenv";
+import nodemailer from 'nodemailer';
+import dotenv from 'dotenv';
 
 dotenv.config();
 
@@ -8,21 +8,21 @@ const emailPass = process.env.EMAIL_PASSWORD;
 
 // CHECK CREDENTIALS ON STARTUP (EXIT IF MISSING)
 if (!emailUser || !emailPass) {
-  console.error(" FATAL:  Email credentials are missing");
-  console.error("Please add EMAIL_USER and EMAIL_PASSWORD to your .env file");
-  
+  console.error(' FATAL:  Email credentials are missing');
+  console.error('Please add EMAIL_USER and EMAIL_PASSWORD to your .env file');
+
   // Only exit in production (allow development without email)
   if (process.env.NODE_ENV === 'production') {
-    console.error("Cannot start server without email credentials in production");
+    console.error('Cannot start server without email credentials in production');
     process.exit(1);
   } else {
-    console.warn(" WARNING: Email service will not work.  Add credentials to .env");
+    console.warn(' WARNING: Email service will not work.  Add credentials to .env');
   }
 }
 
 // CREATE TRANSPORTER
 const transporter = nodemailer.createTransport({
-  service: "gmail",
+  service: 'gmail',
   auth: {
     user: emailUser,
     pass: emailPass,
@@ -32,17 +32,17 @@ const transporter = nodemailer.createTransport({
 //  VERIFY TRANSPORTER ON STARTUP
 transporter.verify(function (error, success) {
   if (error) {
-    console.error("Email transporter error:", error. message);
-    
+    console.error('Email transporter error:', error.message);
+
     // Exit in production if email is broken
-    if (process.env. NODE_ENV === 'production') {
-      console.error("Cannot start server with broken email service in production");
+    if (process.env.NODE_ENV === 'production') {
+      console.error('Cannot start server with broken email service in production');
       process.exit(1);
     } else {
       console.warn("Email service verification failed. Password reset won't work.");
     }
   } else {
-    console.log("Email transporter is ready");
+    console.log('Email transporter is ready');
   }
 });
 
@@ -53,19 +53,19 @@ export async function sendResetPassEmail(email, resetToken) {
 
     // CHECK IF TRANSPORTER IS CONFIGURED
     if (!emailUser || !emailPass) {
-      console.error("Cannot send email:  credentials not configured");
+      console.error('Cannot send email:  credentials not configured');
       return false;
     }
 
-    const frontendUrl = process.env. FRONTEND_URL || "http://localhost:5173";
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
     const resetLink = `${frontendUrl}/reset-password?token=${resetToken}`;
 
-    console.log("Reset link generated:", resetLink);
+    console.log('Reset link generated:', resetLink);
 
     const mailOptions = {
-      from:  `"WebShield Security" <${emailUser}>`,
+      from: `"WebShield Security" <${emailUser}>`,
       to: email,
-      subject:  "Reset Your WebShield Password",
+      subject: 'Reset Your WebShield Password',
       html: `
         <!DOCTYPE html>
         <html>
@@ -153,28 +153,27 @@ export async function sendResetPassEmail(email, resetToken) {
       `,
     };
 
-    console.log("Sending email via Gmail...");
+    console.log('Sending email via Gmail...');
     const info = await transporter.sendMail(mailOptions);
-    
+
     console.log(`Password reset email sent successfully`);
     console.log(`   To: ${email}`);
     console.log(`   Message ID: ${info.messageId}`);
 
     return true;
-
   } catch (error) {
-    console.error("Error sending email:", error.message);
-    
+    console.error('Error sending email:', error.message);
+
     // Log specific Gmail errors
     if (error.code === 'EAUTH') {
-      console.error("   Authentication failed. Check your EMAIL_USER and EMAIL_PASSWORD");
+      console.error('   Authentication failed. Check your EMAIL_USER and EMAIL_PASSWORD');
     } else if (error.code === 'ESOCKET') {
-      console.error("   Network error. Check your internet connection");
+      console.error('   Network error. Check your internet connection');
     } else if (error.responseCode === 550) {
-      console.error("   Recipient email address invalid or blocked");
+      console.error('   Recipient email address invalid or blocked');
     }
-    
-    console.error("   Full error:", error);
+
+    console.error('   Full error:', error);
     return false;
   }
 }

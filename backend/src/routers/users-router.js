@@ -1,134 +1,172 @@
-import express from "express";
-import {
-  loginValidation,
-  signUpValidation,
-} from "../utils/validations/user-validation.js";
-import { checkUser, addUser } from "../controllers/users-controller.js";
-import { checkAuth } from "../middlewares/user-auth.js";
-import { User } from "../models/users-mongoose.js";
+import express from 'express';
+import { loginValidation, signUpValidation } from '../utils/validations/user-validation.js';
+import { checkUser, addUser } from '../controllers/users-controller.js';
+import { checkAuth } from '../middlewares/user-auth.js';
+import { User } from '../models/users-mongoose.js';
 
 const userRouter = express.Router();
 
 // SIGNUP ROUTE
-userRouter.post("/signup", signUpValidation, async (req, res) => {
+userRouter.post('/signup', signUpValidation, async (req, res) => {
   try {
-    const user = req. body;
+    const user = req.body;
+
+    console.log('=== SIGNUP REQUEST ===');
+    console.log('Username:', user.username);
+    console.log('Email:', user.email);
+
     const response = await addUser(user);
 
     // Check if signup failed
     if (response.error) {
+      console.log('Signup failed:', response.error);
       return res.status(400).json({
         success: false,
-        error: response.error
+        error: response.error,
       });
     }
 
+    console.log('Signup successful for:', response.username);
+
     res.status(201).json({
       success: true,
-      message: "Account created successfully",
+      message: 'Account created successfully',
       data: {
         username: response.username,
-        email: response.email
-      }
+        email: response.email,
+      },
     });
   } catch (error) {
-    console.error("Signup error:", error. message);
+    console.error('Signup error:', error.message);
     res.status(500).json({
       success: false,
-      error: "Failed to create account"
+      error: 'Failed to create account',
     });
   }
 });
 
 // LOGIN ROUTE
-userRouter.post("/login", loginValidation, async (req, res) => {
+userRouter.post('/login', loginValidation, async (req, res) => {
   try {
-    const user = req. body;
+    const user = req.body;
+
+    console.log('=== LOGIN REQUEST ===');
+    console.log('Email/Username:', user.email || user.emailOrUsername);
+    console.log('Request origin:', req.headers.origin);
+    console.log('Request host:', req.headers.host);
+
     const response = await checkUser(user);
 
-    // Check if login failed
-    if (response.error) {
+    if (!response.success || response.error) {
+      console.log('Login failed:', response.error);
       return res.status(401).json({
         success: false,
-        error: response.error
+        error: response.error,
       });
     }
 
-    // Set secure cookie
-    res.cookie("token", response.token, {
+    const cookieOptions = {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite:  'strict', // CSRF protection
-      maxAge: 2 * 24 * 60 * 60 * 1000, // 2 days
-      path: '/' // Available on all routes
-    });
+      secure: false, 
+      sameSite: 'lax', // LAX not strict
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      path: '/',
+    };
+
+    res.cookie('token', response.token, cookieOptions);
+
+    console.log('Login successful');
+    console.log(' Cookie set:', 'token=' + response.token.substring(0, 20) + '...');
+    console.log(' Cookie options:', JSON.stringify(cookieOptions));
 
     res.json({
       success: true,
-      message: "Logged in successfully",
-      user: response.user // Include user info
+      message: 'Logged in successfully',
+      user: {
+        _id: response.user._id || response.user.userId,
+        userId: response.user.userId || response.user._id,
+        username: response.user.username,
+        email: response.user.email,
+        role: response.user.role,
+        scanLimit: response.user.scanLimit,
+        scansUsed: response.user.scansUsed || 0,
+      },
     });
   } catch (error) {
-    console.error("Login error:", error. message);
+    console.error('Login error:', error.message);
     res.status(500).json({
       success: false,
-      error: "Login failed"
+      error: 'Login failed',
     });
   }
 });
 
 // PROFILE ROUTE
-userRouter.get("/profile", checkAuth, async (req, res) => {
+userRouter.get('/profile', checkAuth, async (req, res) => {
   try {
+    console.log('=== PROFILE REQUEST ===');
+    console.log('User ID:', req.user.userId);
+
     const user = await User.findById(req.user.userId);
 
     if (!user) {
+      console.log('User not found');
       return res.status(404).json({
         success: false,
-        error: "User not found"
+        error: 'User not found',
       });
     }
 
+    console.log('Profile retrieved for:', user.username);
+
     res.json({
       success: true,
-      message: "Profile retrieved successfully",
+      message: 'Profile retrieved successfully',
       user: {
+        _id: user._id,
+        userId: user._id,
         username: user.username,
         email: user.email,
         role: user.role,
-        scanLimit: user.scanLimit || 5,
+        scanLimit: user.scanLimit || 10,
         scansUsed: user.usedScan || 0,
-        scansRemaining: (user.scanLimit || 5) - (user.usedScan || 0),
+        scansRemaining: (user.scanLimit || 10) - (user.usedScan || 0),
+        createdAt: user.createdAt,
       },
     });
   } catch (error) {
-    console.error("Profile error:", error.message);
+    console.error(' Profile error:', error.message);
     res.status(500).json({
       success: false,
-      error: "Failed to retrieve profile"
+      error: 'Failed to retrieve profile',
     });
   }
 });
 
 // LOGOUT ROUTE
-userRouter.post("/logout", (req, res) => {
+userRouter.post('/logout', (req, res) => {
   try {
-    res.clearCookie("token", {
+    console.log('=== LOGOUT REQUEST ===');
+
+    // Clear cookie
+    res.clearCookie('token', {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      path: '/'
+      secure: false,
+      sameSite: 'lax',
+      path: '/',
     });
+
+    console.log(' Logout successful, cookie cleared');
 
     res.json({
       success: true,
-      message: "Logged out successfully",
+      message: 'Logged out successfully',
     });
   } catch (error) {
-    console.error("Logout error:", error.message);
+    console.error('Logout error:', error.message);
     res.status(500).json({
       success: false,
-      error: "Logout failed"
+      error: 'Logout failed',
     });
   }
 });

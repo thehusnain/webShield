@@ -1,7 +1,7 @@
-import bcrypt from "bcrypt";
-import { User } from "./users-mongoose.js";
-import jwt from "jsonwebtoken";
-import dotenv from "dotenv";
+import bcrypt from 'bcrypt';
+import { User } from './users-mongoose.js';
+import jwt from 'jsonwebtoken';
+import dotenv from 'dotenv';
 
 dotenv.config();
 
@@ -15,10 +15,10 @@ export async function createUser(user) {
     // CHECKING USER WITH USERNAME ARE THEY ALREADY EXISTS
     if (exsitingUser) {
       if (exsitingUser.username === user.username) {
-        throw new Error("Username already exists");
+        throw new Error('Username already exists');
       }
       if (exsitingUser.email === user.email) {
-        throw new Error("Email already exists");
+        throw new Error('Email already exists');
       }
     }
 
@@ -35,7 +35,7 @@ export async function createUser(user) {
     const savedUser = await newUser.save();
     return savedUser;
   } catch (error) {
-    console.error("Error saving User:", error.message);
+    console.error('Error saving User:', error.message);
     throw error;
   }
 }
@@ -52,7 +52,7 @@ export async function verifyUser(user) {
 
     if (!userExists) {
       return {
-        error: "User does not exist",
+        error: 'User does not exist',
       };
     }
 
@@ -68,11 +68,11 @@ export async function verifyUser(user) {
           userId: userExists._id,
         },
         process.env.JWT_SECRET,
-        { expiresIn: "2d" }
+        { expiresIn: '2d' }
       );
       return {
         success: true,
-        message: "You are logged in",
+        message: 'You are logged in',
         token: token,
         user: {
           username: userExists.username,
@@ -82,13 +82,13 @@ export async function verifyUser(user) {
     } else {
       return {
         success: false,
-        error: "Your password is incorrect",
+        error: 'Your password is incorrect',
       };
     }
   } catch (error) {
-    console.error("Error verifying user:", error);
+    console.error('Error verifying user:', error);
     return {
-      error: "Internal server error during verification",
+      error: 'Internal server error during verification',
     };
   }
 }

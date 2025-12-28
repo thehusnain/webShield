@@ -1,23 +1,23 @@
-import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
-import dotenv from "dotenv";
-import { User } from "../models/users-mongoose.js";
-import { passReset } from "../models/pass-reset-mongoose.js";
-import { sendResetPassEmail } from "../utils/email-service.js";
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+import dotenv from 'dotenv';
+import { User } from '../models/users-mongoose.js';
+import { passReset } from '../models/pass-reset-mongoose.js';
+import { sendResetPassEmail } from '../utils/email-service.js';
 
 dotenv.config();
 
 // FORGOT PASSWORD
 export async function forgotPassword(req, res) {
   try {
-    console.log("Forgot Password Request");
+    console.log('Forgot Password Request');
 
     const { email } = req.body;
 
     if (!email) {
       return res.status(400).json({
         success: false,
-        error: "Email is required",
+        error: 'Email is required',
       });
     }
 
@@ -25,22 +25,22 @@ export async function forgotPassword(req, res) {
     const user = await User.findOne({ email });
 
     if (!user) {
-      console.log("User not found for email:", email);
+      console.log('User not found for email:', email);
       return res.status(404).json({
         success: false,
-        error: "No account found with this email",
+        error: 'No account found with this email',
       });
     }
 
-    console. log("User found, generating reset token...");
+    console.log('User found, generating reset token...');
     const resetToken = jwt.sign(
       {
         userId: user._id,
         email: user.email,
-        type: "password_reset",
+        type: 'password_reset',
       },
-      process.env. JWT_RESET_SECRET,
-      { expiresIn:  "15m" }
+      process.env.JWT_RESET_SECRET,
+      { expiresIn: '15m' }
     );
 
     // Save token to database
@@ -56,21 +56,21 @@ export async function forgotPassword(req, res) {
       console.log(`Reset email sent to: ${user.email}`);
       return res.json({
         success: true,
-        message: "Password reset link has been sent to your email",
-        note: "Check spam folder if not received",
+        message: 'Password reset link has been sent to your email',
+        note: 'Check spam folder if not received',
       });
     } else {
-      console.log("Failed to send email to:", user.email);
+      console.log('Failed to send email to:', user.email);
       return res.status(500).json({
         success: false,
-        error: "Failed to send email. Please try again.",
+        error: 'Failed to send email. Please try again.',
       });
     }
   } catch (error) {
-    console.error("Forgot password error:", error. message);
+    console.error('Forgot password error:', error.message);
     return res.status(500).json({
       success: false,
-      error: "An error occurred. Please try again.",
+      error: 'An error occurred. Please try again.',
     });
   }
 }
@@ -78,45 +78,42 @@ export async function forgotPassword(req, res) {
 // RESET PASSWORD
 export async function resetPassword(req, res) {
   try {
-    console.log("RESET PASSWORD REQUEST");
+    console.log('RESET PASSWORD REQUEST');
 
     const { token, newPassword } = req.body;
 
     if (!token || !newPassword) {
       return res.status(400).json({
         success: false,
-        error: "Token and new password are required",
+        error: 'Token and new password are required',
       });
     }
 
     // VERIFY TOKEN
     let decoded;
     try {
-      decoded = jwt.verify(
-        token,
-        process.env.JWT_RESET_SECRET 
-      );
-      console.log("JWT Verification SUCCESS for:", decoded.email);
+      decoded = jwt.verify(token, process.env.JWT_RESET_SECRET);
+      console.log('JWT Verification SUCCESS for:', decoded.email);
     } catch (jwtError) {
-      console.log("JWT Verification FAILED:", jwtError.message);
+      console.log('JWT Verification FAILED:', jwtError.message);
       return res.status(400).json({
         success: false,
-        error: "Invalid or expired reset token",
+        error: 'Invalid or expired reset token',
       });
     }
 
     // CHECKING TOKEN IN DATABASE
     const resetRecord = await passReset.findOne({
       token: token,
-      email: decoded. email,
+      email: decoded.email,
       used: false,
     });
 
     if (!resetRecord) {
-      console.log("Token not found or already used/expired");
+      console.log('Token not found or already used/expired');
       return res.status(400).json({
         success: false,
-        error: "Invalid or already used reset token",
+        error: 'Invalid or already used reset token',
       });
     }
 
@@ -125,10 +122,9 @@ export async function resetPassword(req, res) {
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?])[A-Za-z\d!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]{8,}$/;
 
     if (!passwordRegex.test(newPassword)) {
-      return res. status(400).json({
+      return res.status(400).json({
         success: false,
-        error: 
-          "Password must contain: 8+ chars, uppercase, lowercase, number, special character",
+        error: 'Password must contain: 8+ chars, uppercase, lowercase, number, special character',
       });
     }
 
@@ -137,10 +133,7 @@ export async function resetPassword(req, res) {
     const hashedPassword = bcrypt.hashSync(newPassword, salt);
 
     // UPDATING USER PASSWORD
-    await User.findOneAndUpdate(
-      { email: decoded.email },
-      { password: hashedPassword }
-    );
+    await User.findOneAndUpdate({ email: decoded.email }, { password: hashedPassword });
 
     // MARKING TOKEN AS USED
     await passReset.findByIdAndUpdate(resetRecord._id, {
@@ -150,14 +143,13 @@ export async function resetPassword(req, res) {
     console.log(`Password reset successful for: ${decoded.email}`);
     return res.json({
       success: true,
-      message: 
-        "Password reset successfully.  You can now login with new password.",
+      message: 'Password reset successfully.  You can now login with new password.',
     });
   } catch (error) {
-    console.error("Reset password error:", error.message);
+    console.error('Reset password error:', error.message);
     return res.status(500).json({
       success: false,
-      error: "An error occurred. Please try again.",
+      error: 'An error occurred. Please try again.',
     });
   }
 }

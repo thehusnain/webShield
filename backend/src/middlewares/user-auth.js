@@ -1,49 +1,54 @@
-import jwt from "jsonwebtoken";
-import dotenv from "dotenv";
+import jwt from 'jsonwebtoken';
+import dotenv from 'dotenv';
 
 dotenv.config();
 
 export async function checkAuth(req, res, next) {
+  console.log('AUTH CHECK ');
+  console.log('Cookies received:', Object.keys(req.cookies));
+  console.log('Has token:', !!req.cookies?.token);
+
   const cookies = req.cookies;
 
   // Check if token exists
   if (!cookies.token) {
-    return res.status(401).json({ 
+    console.log(' No token found in cookies');
+    return res.status(401).json({
       success: false,
-      error: "You are not logged in" 
+      error: 'You are not logged in',
     });
   }
 
   try {
     // Verify JWT token
-    const decoded = jwt. verify(cookies.token, process. env.JWT_SECRET);
-    console.log("User Verified:", decoded.username); 
+    const decoded = jwt.verify(cookies.token, process.env.JWT_SECRET);
+    console.log('User Verified:', decoded.username, '| Role:', decoded.role);
 
     req.user = decoded;
     next();
-
   } catch (error) {
+    console.log('Token verification failed:', error.message);
+
     // Handle token expiration
     if (error.name === 'TokenExpiredError') {
-      return res.status(401).json({ 
-        success: false, 
-        error: "Session expired, please login again" 
+      return res.status(401).json({
+        success: false,
+        error: 'Session expired, please login again',
       });
     }
 
     // Handle invalid token
     if (error.name === 'JsonWebTokenError') {
-      return res.status(401).json({ 
-        success: false, 
-        error: "Invalid session token" 
+      return res.status(401).json({
+        success: false,
+        error: 'Invalid session token',
       });
     }
 
     // Handle other JWT errors
-    console.error("Token verification failed:", error.message); 
-    return res.status(401).json({ 
-      success: false, 
-      error: "Authentication failed" 
+    return res.status(401).json({
+      success: false,
+      error: 'Authentication failed',
     });
   }
 }

@@ -1,19 +1,19 @@
-import Groq from "groq-sdk"
-import dotenv from "dotenv";
+import Groq from 'groq-sdk';
+import dotenv from 'dotenv';
 dotenv.config();
 
 const groq = new Groq({
-    apiKey: process.env.GROQ_API
+  apiKey: process.env.GROQ_API,
 });
 
 export async function aiReport(summaryText) {
-    try {
-        const response = await groq.chat.completions.create({
-            model: "llama-3.1-8b-instant",
-            messages: [
-                {
-                    role: "system",
-                    content: `You are a cybersecurity assistant. Your job is to explain scan results using ONLY the data provided.
+  try {
+    const response = await groq.chat.completions.create({
+      model: 'llama-3.1-8b-instant',
+      messages: [
+        {
+          role: 'system',
+          content: `You are a cybersecurity assistant. Your job is to explain scan results using ONLY the data provided.
 
 RULES:
 1. NEVER guess or invent data
@@ -24,19 +24,22 @@ RULES:
 6. Base all analysis ONLY on the provided scan data
 7. If data is missing, say "Data not available" instead of guessing
 
-IMPORTANT: Look at the "ACTUAL SCAN DATA" section and use ONLY that information.`
-                },
-                {
-                    role: "user",
-                    content: summaryText
-                }
-            ],
-            temperature: 0.3,  
-            max_tokens: 800
-        });
-        return response.choices[0].message.content;
-    } catch (error) {
-        console.error("AI Report Error:", error);
-        return "ERROR: Could not generate AI analysis. Please check the raw scan results below.\n\n" + summaryText;
-    }
+IMPORTANT: Look at the "ACTUAL SCAN DATA" section and use ONLY that information.`,
+        },
+        {
+          role: 'user',
+          content: summaryText,
+        },
+      ],
+      temperature: 0.3,
+      max_tokens: 800,
+    });
+    return response.choices[0].message.content;
+  } catch (error) {
+    console.error('AI Report Error:', error);
+    return (
+      'ERROR: Could not generate AI analysis. Please check the raw scan results below.\n\n' +
+      summaryText
+    );
+  }
 }

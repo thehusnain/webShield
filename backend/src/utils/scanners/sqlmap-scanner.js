@@ -1,47 +1,49 @@
-import { exec } from "child_process";
-import { promisify } from "util";
+import { exec } from 'child_process';
+import { promisify } from 'util';
 
 const execAsync = promisify(exec);
 
 export async function scanWithSqlmap(targetUrl) {
   try {
-    console.log(`SQLMap scanning:  ${targetUrl}`);
+    console.log(`Starting SQLMap scan for ${targetUrl}`);
 
     // Clean URL
-    let cleanUrl = targetUrl. trim();
-    if (cleanUrl.endsWith('/')) {
-      cleanUrl = cleanUrl.slice(0, -1);
+    let testUrl = targetUrl.trim();
+    if (testUrl.endsWith('/')) {
+      testUrl = testUrl.slice(0, -1);
     }
 
     // Add parameter if missing
-    let testUrl = cleanUrl;
-    if (!  cleanUrl.includes('?')) {
-      console.log('No parameters in URL, adding test parameter:   ? id=1');
-      testUrl = `${cleanUrl}/?id=1`;
+    if (!testUrl.includes('?')) {
+      console.log('No parameters in URL, adding test parameter');
+      testUrl = `${testUrl}/?id=1`;
     }
 
     console.log(`Testing URL: ${testUrl}`);
 
-    // Simplified SQLMap command
-    const command = `
-      timeout 120 sqlmap 
-      -u "${testUrl}" 
-      --batch 
-      --level=2 
-      --risk=2 
-      --threads=3 
-      --timeout=30 
-      --flush-session
-      --answers="follow=N"
-    `.replace(/\n/g, ' ').replace(/\s+/g, ' ').trim();
+    // Simplified SQLMap command for medium level
+    const command = `timeout 90 sqlmap -u "${testUrl}" --batch --smart --level=1 --risk=1 --threads=2 --no-cast --disable-coloring --answers="follow=N,quit=N"`;
 
-    console.log("Running SQLMap.. .");
+    console.log('Running SQLMap.. .');
 
-    const { stdout, stderr } = await execAsync(command, {
-      maxBuffer:   1024 * 1024 * 10,
-    });
+    let stdout = '';
+    let stderr = '';
 
-    console.log("SQLMap output length:", stdout.length);
+    try {
+      const result = await execAsync(command, {
+        maxBuffer: 1024 * 1024 * 10,
+        timeout: 95000, // 95 seconds
+      });
+      stdout = result.stdout;
+      stderr = result.stderr;
+    } catch (error) {
+      // Timeout or error
+      stdout = error.stdout || '';
+      stderr = error.stderr || '';
+      console.log('SQLMap completed with timeout or error');
+    }
+
+    console.log('SQLMap output length:', stdout.length);
 
     // Parse results
     let vulnerable = false;
@@ -50,100 +52,98 @@ export async function scanWithSqlmap(targetUrl) {
 
     const lines = stdout.split('\n');
 
-    // Check for DEFINITE vulnerability markers
-    const definiteVulnMarkers = [
-      'sqlmap identified the following injection point',
-      'parameter appears to be.*injectable',
-      'parameter is.*injectable',
-      'injection point',
-      'payload:  ',
-      'back-end DBMS: ',
+    // Vulnerability markers
+    const vulnMarkers = [
+      'parameter . * appears to be . * injectable',
+      'parameter .* is .* injectable',
+      'payload: ',
+      'Type: ',
+      'Title:',
+      'back-end DBMS:',
     ];
 
-    // Check for NEGATIVE markers
+    // Negative markers
     const negativeMarkers = [
       'does not seem to be injectable',
-      'might not be injectable',
       'not injectable',
-      'all tested parameters do not appear to be injectable',
-      'all tested parameters appear to be not injectable',
       'no injection point',
+      'all tested parameters do not appear to be injectable',
+      'it is not injectable',
     ];
 
-    // Analyze each line
+    // Check each line
     lines.forEach(line => {
       const lowerLine = line.toLowerCase();
 
-      // Check NEGATIVE markers first
+      // Check negative markers
       negativeMarkers.forEach(marker => {
         if (lowerLine.includes(marker)) {
-          warnings.push(line.  trim());
+          warnings.push(line.trim());
         }
       });
 
-      // Check DEFINITE vulnerability markers
-      definiteVulnMarkers.forEach(marker => {
+      // Check vulnerability markers
+      vulnMarkers.forEach(marker => {
         const regex = new RegExp(marker, 'i');
-        if (regex.test(lowerLine)) {
+        if (regex.test(line) && line.trim().length > 10) {
           vulnerabilities.push(line.trim());
           vulnerable = true;
         }
       });
     });
 
-    // Final decision logic
+    // Extract backend database
+    let dbms = null;
+    const dbmsMatch = stdout.match(/back-end DBMS:\s*([^\n]+)/i);
+    if (dbmsMatch) {
+      dbms = dbmsMatch[1].trim();
+    }
+
+    // Extract injection type
+    let injectionType = null;
+    const typeMatch = stdout.match(/Type:\s*([^\n]+)/i);
+    if (typeMatch) {
+      injectionType = typeMatch[1].trim();
+    }
+
+    // Final decision
     if (warnings.length > 0 && vulnerabilities.length === 0) {
       vulnerable = false;
     }
 
-    if (vulnerabilities.  length > 0) {
-      vulnerable = true;
-    }
-
-    // Extract additional information
-    let dbms = null;
-    let injectionType = null;
-
-    lines.forEach(line => {
-      if (line.includes('back-end DBMS: ')) {
-        dbms = line.split(': ')[1]?.trim();
-      }
-      if (line.includes('Type: ') && line.length < 100) {
-        injectionType = line.split(':')[1]?.trim();
-      }
-    });
-
-    console.log(`Final result:  Vulnerable=${vulnerable}, Findings=${vulnerabilities.length}`);
+    console.log(`SQLMap result:  Vulnerable=${vulnerable}, Findings=${vulnerabilities.length}`);
 
     return {
-      tool: "sqlmap",
+      tool: 'sqlmap',
       success: true,
       vulnerable: vulnerable,
-      vulnerabilities: vulnerable ? vulnerabilities.  slice(0, 10) : [],
-      warnings: warnings.  slice(0, 5),
+      vulnerabilities: vulnerable ? vulnerabilities.slice(0, 10) : [],
+      warnings: warnings.slice(0, 5),
       details: {
         testedUrl: testUrl,
         dbms: dbms,
         injectionType: injectionType,
-        definiteFindings: vulnerabilities. length,
-        warningCount: warnings.length,
+        findingsCount: vulnerabilities.length,
       },
-      rawOutput: stdout. substring(0, 3000) + (stderr ? "\n\nStderr:\n" + stderr. substring(0, 500) : ""),
+      rawOutput: stdout.substring(0, 3000),
       target: testUrl,
+      summary: vulnerable
+        ? `SQL Injection vulnerability detected!  Database: ${dbms || 'Unknown'}`
+        : 'No SQL injection vulnerabilities detected',
     };
-
   } catch (error) {
-    console.error("SQLMap error:", error.message);
-    
+    console.error('SQLMap error:', error.message);
+
     return {
-      tool: "sqlmap",
+      tool: 'sqlmap',
       success: false,
       error: error.message,
       vulnerable: false,
       vulnerabilities: [],
       warnings: [],
-      rawOutput: `Error: ${error.message}\n\n${error.stdout || ''}\n\n${error.stderr || ''}`,
+      rawOutput: `Error:  ${error.message}`,
       target: targetUrl,
+      summary: 'Scan failed to complete',
     };
   }
 }
