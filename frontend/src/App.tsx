@@ -13,88 +13,104 @@ import Dashboard from './pages/Dashboard';
 import StartScan from './pages/StartScan';
 import ScanProgress from './pages/ScanProgress';
 import ScanResults from './pages/ScanResults';
-import Profile from './pages/Profile';
 import ScanHistory from './pages/ScanHistory';
+import Profile from './pages/Profile';
 import AdminDashboard from './pages/AdminDashboard';
-
+import ResetPassword from './pages/ResetPassword';
+import AdminScanHistory from './pages/AdminScanHistory';
 export default function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
         <BrowserRouter>
           <Routes>
-            {/* Public routes */}
+            {/* Public Routes */}
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
-            
-            {/* Protected routes - require authentication */}
-            <Route 
-              path="/dashboard" 
+            <Route path="/reset-password" element={<ResetPassword />} />
+            {/* Protected Routes */}
+            <Route
+              path="/dashboard"
               element={
                 <ProtectedRoute>
                   <Dashboard />
                 </ProtectedRoute>
-              } 
+              }
             />
-            
-            <Route 
-              path="/scan/start" 
+            <Route
+              path="/admin"
+              element={
+                <ProtectedRoute>
+                  <AdminRoute>
+                    <AdminDashboard />
+                  </AdminRoute>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/scan/start"
               element={
                 <ProtectedRoute>
                   <StartScan />
                 </ProtectedRoute>
-              } 
+              }
             />
-            
-            <Route 
-              path="/scan/: scanId" 
+            <Route
+              path="/scan/:scanId"
               element={
                 <ProtectedRoute>
                   <ScanProgress />
                 </ProtectedRoute>
-              } 
+              }
             />
-            
-            <Route 
-              path="/scan/:scanId/results" 
+            <Route
+              path="/scan/:scanId/results"
               element={
                 <ProtectedRoute>
                   <ScanResults />
                 </ProtectedRoute>
-              } 
+              }
             />
-            
-            <Route 
-              path="/profile" 
-              element={
-                <ProtectedRoute>
-                  <Profile />
-                </ProtectedRoute>
-              } 
-            />
-            
-            <Route 
-              path="/history" 
+            <Route
+              path="/history"
               element={
                 <ProtectedRoute>
                   <ScanHistory />
                 </ProtectedRoute>
-              } 
+              }
             />
-            
-            {/* Admin only route */}
-            <Route 
-              path="/admin" 
+            <Route
+              path="/profile"
               element={
-                <AdminRoute>
-                  <AdminDashboard />
-                </AdminRoute>
-              } 
+                <ProtectedRoute>
+                  <Profile />
+                </ProtectedRoute>
+              }
             />
-            
-            {/* Catch all - redirect to home */}
+            // Add these routes
+            <Route
+              path="/admin/history"
+              element={
+                <ProtectedRoute>
+                  <AdminRoute>
+                    <AdminScanHistory />
+                  </AdminRoute>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/users/:userId/history"
+              element={
+                <ProtectedRoute>
+                  <AdminRoute>
+                    <ScanHistory />
+                  </AdminRoute>
+                </ProtectedRoute>
+              }
+            />
+            {/* Catch-all route */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </BrowserRouter>

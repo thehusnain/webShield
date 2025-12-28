@@ -3,7 +3,7 @@ export interface User {
   id: string;
   username: string;
   email: string;
-  role?:  'user' | 'admin';
+  role?: 'user' | 'admin';
   scanLimit?: number;
   scansUsed?: number;
 }
@@ -12,8 +12,8 @@ export interface User {
 export interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
-  login: (email: string, password:  string) => Promise<void>;
-  signup: (username: string, email:  string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<void>;
+  signup: (username: string, email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -27,10 +27,10 @@ export type ScanStatus = 'pending' | 'running' | 'completed' | 'failed' | 'cance
 export interface Scan {
   _id: string;
   userId: string;
-  targetUrl:  string;
+  targetUrl: string;
   scanType: ScanType;
   status: ScanStatus;
-  results?:  ScanResults;
+  results?: ScanResults;
   reportContent?: string;
   reportGeneratedAt?: string;
   createdAt: string;
@@ -39,7 +39,7 @@ export interface Scan {
 
 // Scan results structure
 export interface ScanResults {
-  nmap?:  {
+  nmap?: {
     openPorts: string[];
     rawOutput: string;
   };

@@ -10,7 +10,7 @@ interface CardProps {
 // Reusable card container
 export default function Card({ children, className = '', hover = false }: CardProps) {
   return (
-    <div 
+    <div
       className={`
         card p-6
         ${hover ? 'hover:shadow-xl hover:scale-105 cursor-pointer' : ''}

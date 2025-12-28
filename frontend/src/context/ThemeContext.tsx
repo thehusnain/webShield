@@ -20,25 +20,21 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
   // Apply theme class to document when theme changes
   useEffect(() => {
     const root = window.document.documentElement;
-    
+
     // Remove old theme class
     root.classList.remove('light', 'dark');
-    
+
     // Add new theme class
     root.classList.add(theme);
-    
+
     // Save to localStorage
     localStorage.setItem('theme', theme);
   }, [theme]);
 
   // Toggle between light and dark
   const toggleTheme = () => {
-    setTheme(prev => prev === 'light' ? 'dark' : 'light');
+    setTheme(prev => (prev === 'light' ? 'dark' : 'light'));
   };
 
-  return (
-    <ThemeContext.Provider value={{ theme, toggleTheme }}>
-      {children}
-    </ThemeContext.Provider>
-  );
+  return <ThemeContext.Provider value={{ theme, toggleTheme }}>{children}</ThemeContext.Provider>;
 }

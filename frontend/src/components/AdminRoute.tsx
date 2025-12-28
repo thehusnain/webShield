@@ -7,14 +7,9 @@ interface AdminRouteProps {
 }
 
 export default function AdminRoute({ children }: AdminRouteProps) {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, loading } = useAuth();
 
-  console.log('AdminRoute - User:', user);
-  console.log('AdminRoute - isAuthenticated:', isAuthenticated);
-  console.log('AdminRoute - User role:', user?.role);
-
-  // Show loading while checking auth
-  if (isAuthenticated === undefined) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-light-bg dark:bg-dark-bg flex items-center justify-center">
         <div className="text-center">
@@ -25,19 +20,13 @@ export default function AdminRoute({ children }: AdminRouteProps) {
     );
   }
 
-  // Redirect to login if not authenticated
-  if (! isAuthenticated) {
-    console.log('Not authenticated, redirecting to login');
+  if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
 
-  // Redirect to dashboard if not admin
   if (user?.role !== 'admin') {
-    console.log('Not admin, redirecting to dashboard.  Current role:', user?.role);
     return <Navigate to="/dashboard" replace />;
   }
 
-  console.log('Admin access granted! ');
-  // Render children if admin
   return <>{children}</>;
 }

@@ -4,27 +4,28 @@ import { ButtonHTMLAttributes } from 'react';
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'danger';
   isLoading?: boolean;
-  children:  React.ReactNode;
+  children: React.ReactNode;
 }
 
 // Reusable button component
-export default function Button({ 
-  variant = 'primary', 
-  isLoading = false, 
-  children, 
+export default function Button({
+  variant = 'primary',
+  isLoading = false,
+  children,
   className = '',
   disabled,
-  ...props 
+  ...props
 }: ButtonProps) {
-  
   // Base styles for all buttons
-  const baseStyles = 'px-6 py-3 rounded-lg font-semibold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2';
-  
+  const baseStyles =
+    'px-6 py-3 rounded-lg font-semibold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2';
+
   // Variant-specific styles
   const variantStyles = {
-    primary:   'bg-primary text-black hover:bg-primary-dark hover:shadow-lg hover:shadow-primary/50',
-    secondary:  'bg-transparent border-2 border-primary text-primary hover:bg-primary hover:text-black',
-    danger:  'bg-red-600 text-white hover:bg-red-700',
+    primary: 'bg-primary text-black hover:bg-primary-dark hover:shadow-lg hover:shadow-primary/50',
+    secondary:
+      'bg-transparent border-2 border-primary text-primary hover:bg-primary hover:text-black',
+    danger: 'bg-red-600 text-white hover:bg-red-700',
   };
 
   return (
@@ -33,7 +34,7 @@ export default function Button({
       disabled={disabled || isLoading}
       {...props}
     >
-      {isLoading ?  (
+      {isLoading ? (
         <>
           <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
           <span>Loading...</span>

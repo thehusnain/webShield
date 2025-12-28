@@ -24,7 +24,7 @@ export default function ScanHistory() {
 
   const fetchScans = async () => {
     try {
-      const response = await scanAPI. getHistory();
+      const response = await scanAPI.getHistory();
       setScans(response.scans || []);
     } catch (error) {
       console.error('Failed to fetch scans:', error);
@@ -37,7 +37,7 @@ export default function ScanHistory() {
     switch (status) {
       case 'completed':
         return <HiCheckCircle className="w-5 h-5 text-green-500" />;
-      case 'running': 
+      case 'running':
       case 'pending':
         return <HiClock className="w-5 h-5 text-yellow-500 animate-pulse" />;
       case 'failed':
@@ -54,7 +54,7 @@ export default function ScanHistory() {
       case 'running':
       case 'pending':
         return 'text-yellow-500';
-      case 'failed': 
+      case 'failed':
         return 'text-red-500';
       default:
         return 'text-gray-500';
@@ -70,16 +70,14 @@ export default function ScanHistory() {
   return (
     <div className="page-container min-h-screen">
       <AuthNavbar />
-      
+
       <div className="content-wrapper py-8">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-4xl font-bold">
             <span className="text-gradient">Scan History</span>
           </h1>
           <Link to="/scan/start">
-            <button className="btn-primary">
-              New Scan
-            </button>
+            <button className="btn-primary">New Scan</button>
           </Link>
         </div>
 
@@ -119,7 +117,7 @@ export default function ScanHistory() {
             onClick={() => setFilter('failed')}
             className={`px-4 py-2 rounded-lg transition-colors ${
               filter === 'failed'
-                ?  'bg-primary text-black'
+                ? 'bg-primary text-black'
                 : 'bg-light-card dark:bg-dark-card border border-light-border dark:border-dark-border'
             }`}
           >
@@ -135,25 +133,23 @@ export default function ScanHistory() {
               <p className="text-gray-600 dark:text-gray-400">Loading scans...</p>
             </div>
           </Card>
-        ) : filteredScans.length === 0 ?  (
+        ) : filteredScans.length === 0 ? (
           <Card>
             <div className="text-center py-12">
               <div className="text-6xl mb-4">📋</div>
               <p className="text-gray-600 dark:text-gray-400 mb-4">
-                {filter === 'all' ?  'No scans yet' : `No ${filter} scans`}
+                {filter === 'all' ? 'No scans yet' : `No ${filter} scans`}
               </p>
               <Link to="/scan/start">
-                <button className="btn-primary">
-                  Start First Scan
-                </button>
+                <button className="btn-primary">Start First Scan</button>
               </Link>
             </div>
           </Card>
         ) : (
           <div className="space-y-4">
-            {filteredScans.map((scan) => (
-              <Link 
-                key={scan._id} 
+            {filteredScans.map(scan => (
+              <Link
+                key={scan._id}
                 to={scan.status === 'completed' ? `/scan/${scan._id}/results` : `/scan/${scan._id}`}
               >
                 <Card hover>
@@ -170,11 +166,21 @@ export default function ScanHistory() {
                       </div>
                     </div>
                     <div className="flex items-center gap-4">
-                      <span className={`font-semibold uppercase text-sm ${getStatusColor(scan.status)}`}>
+                      <span
+                        className={`font-semibold uppercase text-sm ${getStatusColor(scan.status)}`}
+                      >
                         {scan.status}
                       </span>
-                      <svg className="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                      <svg
+                        className="w-5 h-5 text-gray-400"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                          clipRule="evenodd"
+                        />
                       </svg>
                     </div>
                   </div>

@@ -2,17 +2,12 @@ import { ReactNode } from 'react';
 
 interface EmptyStateProps {
   icon?: string;
-  title:  string;
-  message:  string;
+  title: string;
+  message: string;
   action?: ReactNode;
 }
 
-export default function EmptyState({ 
-  icon = '📋', 
-  title, 
-  message, 
-  action 
-}: EmptyStateProps) {
+export default function EmptyState({ icon = '📋', title, message, action }: EmptyStateProps) {
   return (
     <div className="text-center py-12">
       <div className="text-6xl mb-4">{icon}</div>

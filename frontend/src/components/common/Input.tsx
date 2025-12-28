@@ -8,14 +8,7 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 }
 
 // Reusable input component
-export default function Input({ 
-  label, 
-  error, 
-  icon,
-  className = '',
-  ... props 
-}: InputProps) {
-  
+export default function Input({ label, error, icon, className = '', ...props }: InputProps) {
   return (
     <div className="w-full">
       {/* Label */}
@@ -24,32 +17,28 @@ export default function Input({
           {label}
         </label>
       )}
-      
+
       {/* Input container */}
       <div className="relative">
         {/* Icon if provided */}
         {icon && (
-          <div className="absolute left-3 top-1/2 -translate-y-1/2 text-primary">
-            {icon}
-          </div>
+          <div className="absolute left-3 top-1/2 -translate-y-1/2 text-primary">{icon}</div>
         )}
-        
+
         {/* Input field */}
         <input
           className={`
             input-field
-            ${icon ? 'pl-10' :  ''}
+            ${icon ? 'pl-10' : ''}
             ${error ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20' : ''}
             ${className}
           `}
           {...props}
         />
       </div>
-      
+
       {/* Error message */}
-      {error && (
-        <p className="mt-1 text-sm text-red-500">{error}</p>
-      )}
+      {error && <p className="mt-1 text-sm text-red-500">{error}</p>}
     </div>
   );
 }

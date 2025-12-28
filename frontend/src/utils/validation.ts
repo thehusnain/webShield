@@ -5,7 +5,7 @@ export function validateEmail(email: string): boolean {
 }
 
 // Validate password strength
-export function validatePassword(password:  string): string | null {
+export function validatePassword(password: string): string | null {
   if (password.length < 8) {
     return 'Password must be at least 8 characters';
   }
@@ -18,7 +18,7 @@ export function validatePassword(password:  string): string | null {
   if (!/[0-9]/.test(password)) {
     return 'Password must contain number';
   }
-  if (!/[@$!%*?&]/. test(password)) {
+  if (!/[@$!%*?&]/.test(password)) {
     return 'Password must contain special character';
   }
   return null;
@@ -39,7 +39,7 @@ export function validateUsername(username: string): string | null {
 }
 
 // Validate URL format
-export function validateURL(url:  string): boolean {
+export function validateURL(url: string): boolean {
   try {
     new URL(url);
     return true;

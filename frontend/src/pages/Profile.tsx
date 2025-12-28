@@ -26,7 +26,7 @@ export default function Profile() {
       setStats({
         totalScans: scans.length,
         completedScans: scans.filter((s: any) => s.status === 'completed').length,
-        recentScans: scans. slice(0, 3),
+        recentScans: scans.slice(0, 3),
       });
     } catch (error) {
       console.error('Failed to fetch stats:', error);
@@ -38,7 +38,7 @@ export default function Profile() {
   return (
     <div className="page-container min-h-screen">
       <AuthNavbar />
-      
+
       <div className="content-wrapper py-8">
         <h1 className="text-4xl font-bold mb-8">
           <span className="text-gradient">Profile</span>
@@ -56,7 +56,7 @@ export default function Profile() {
                 </div>
                 <h2 className="text-2xl font-bold mb-2">{user?.username}</h2>
                 <p className="text-gray-600 dark:text-gray-400 mb-6">{user?.email}</p>
-                
+
                 <div className="space-y-3 text-left">
                   <div className="flex items-center gap-3 p-3 bg-light-bg dark:bg-dark-bg rounded-lg">
                     <HiUser className="w-5 h-5 text-primary" />
@@ -65,7 +65,7 @@ export default function Profile() {
                       <p className="font-semibold">{user?.username}</p>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center gap-3 p-3 bg-light-bg dark: bg-dark-bg rounded-lg">
                     <HiMail className="w-5 h-5 text-primary" />
                     <div>
@@ -73,9 +73,9 @@ export default function Profile() {
                       <p className="font-semibold truncate">{user?.email}</p>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center gap-3 p-3 bg-light-bg dark:bg-dark-bg rounded-lg">
-                    <HiShieldCheck className="w-5 h-5 text-primary" />
+                    <span className="text-4xl">🛡️</span>
                     <div>
                       <p className="text-xs text-gray-600 dark:text-gray-400">Role</p>
                       <p className="font-semibold capitalize">{user?.role || 'User'}</p>
@@ -97,7 +97,7 @@ export default function Profile() {
                   </div>
                   <div>
                     <p className="text-sm text-gray-600 dark:text-gray-400">Total Scans</p>
-                    <p className="text-3xl font-bold">{stats. totalScans}</p>
+                    <p className="text-3xl font-bold">{stats.totalScans}</p>
                   </div>
                 </div>
               </Card>
@@ -106,12 +106,16 @@ export default function Profile() {
                 <div className="flex items-center gap-4">
                   <div className="w-14 h-14 bg-green-500/20 rounded-lg flex items-center justify-center">
                     <svg className="w-7 h-7 text-green-500" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      <path
+                        fillRule="evenodd"
+                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                        clipRule="evenodd"
+                      />
                     </svg>
                   </div>
                   <div>
                     <p className="text-sm text-gray-600 dark:text-gray-400">Completed</p>
-                    <p className="text-3xl font-bold text-green-500">{stats. completedScans}</p>
+                    <p className="text-3xl font-bold text-green-500">{stats.completedScans}</p>
                   </div>
                 </div>
               </Card>
@@ -121,7 +125,10 @@ export default function Profile() {
             <Card>
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-bold">Recent Activity</h2>
-                <Link to="/history" className="text-primary hover:text-primary-dark font-semibold text-sm">
+                <Link
+                  to="/history"
+                  className="text-primary hover:text-primary-dark font-semibold text-sm"
+                >
                   View All
                 </Link>
               </div>
@@ -135,31 +142,38 @@ export default function Profile() {
                 <div className="text-center py-8">
                   <p className="text-gray-600 dark:text-gray-400 mb-4">No recent scans</p>
                   <Link to="/scan/start">
-                    <button className="btn-primary">
-                      Start First Scan
-                    </button>
+                    <button className="btn-primary">Start First Scan</button>
                   </Link>
                 </div>
               ) : (
                 <div className="space-y-3">
                   {stats.recentScans.map((scan: any) => (
-                    <Link 
+                    <Link
                       key={scan._id}
-                      to={scan.status === 'completed' ? `/scan/${scan._id}/results` : `/scan/${scan._id}`}
+                      to={
+                        scan.status === 'completed'
+                          ? `/scan/${scan._id}/results`
+                          : `/scan/${scan._id}`
+                      }
                     >
                       <div className="p-4 rounded-lg border border-light-border dark:border-dark-border hover:border-primary transition-colors">
                         <div className="flex items-center justify-between">
                           <div>
                             <p className="font-medium truncate">{scan.targetUrl}</p>
                             <p className="text-sm text-gray-600 dark: text-gray-400">
-                              {scan.scanType. toUpperCase()} • {new Date(scan. createdAt).toLocaleDateString()}
+                              {scan.scanType.toUpperCase()} •{' '}
+                              {new Date(scan.createdAt).toLocaleDateString()}
                             </p>
                           </div>
-                          <span className={`text-sm font-semibold uppercase ${
-                            scan.status === 'completed' ?  'text-green-500' : 
-                            scan.status === 'running' ? 'text-yellow-500' :
-                            'text-red-500'
-                          }`}>
+                          <span
+                            className={`text-sm font-semibold uppercase ${
+                              scan.status === 'completed'
+                                ? 'text-green-500'
+                                : scan.status === 'running'
+                                ? 'text-yellow-500'
+                                : 'text-red-500'
+                            }`}
+                          >
                             {scan.status}
                           </span>
                         </div>

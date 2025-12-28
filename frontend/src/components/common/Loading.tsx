@@ -1,5 +1,5 @@
 interface LoadingProps {
-  message?:  string;
+  message?: string;
 }
 
 export default function Loading({ message = 'Loading.. .' }: LoadingProps) {

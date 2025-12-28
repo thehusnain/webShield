@@ -1,47 +1,47 @@
-import { useState, FormEvent } from 'react';
+import { useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import { validateEmail } from '../utils/validation';
 import Button from '../components/common/Button';
 import Input from '../components/common/Input';
-import { HiMail, HiLockClosed, HiShieldCheck } from 'react-icons/hi';
 
 export default function Login() {
   const navigate = useNavigate();
   const { login } = useAuth();
-
-  // Form state
-  const [formData, setFormData] = useState({
-    email: '',
-    password:  '',
-  });
-
-  // Error state
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  
-  // Loading state
   const [isLoading, setIsLoading] = useState(false);
 
-  // Handle input change
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e. target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-    
-    // Clear error when user types
-    if (error) setError('');
-  };
-
-  // Handle form submit
+  // In Login.tsx, update the handleSubmit function:
+  // In Login.tsx
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    
-    setIsLoading(true);
     setError('');
 
+    if (!validateEmail(email)) {
+      setError('Please enter a valid email address');
+      return;
+    }
+
+    if (!password) {
+      setError('Password is required');
+      return;
+    }
+
+    setIsLoading(true);
     try {
-      await login(formData. email, formData.password);
-      navigate('/dashboard');
-    } catch (err:  any) {
-      setError(err.message || 'Login failed');
+      // Get the response from login
+      const response = await login(email, password);
+
+      // Check if user is admin from the response
+      if (response?.user?.role === 'admin') {
+        navigate('/admin');
+      } else {
+        navigate('/dashboard');
+      }
+    } catch (err: any) {
+      setError(err.message);
     } finally {
       setIsLoading(false);
     }
@@ -49,16 +49,14 @@ export default function Login() {
 
   return (
     <div className="page-container min-h-screen flex items-center justify-center p-4">
-      {/* Background decoration */}
       <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/5" />
-      
+
       <div className="relative w-full max-w-md">
         <div className="card p-8">
-          
           {/* Logo */}
           <div className="flex justify-center mb-6">
             <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center cyber-glow">
-              <HiShieldCheck className="w-10 h-10 text-black" />
+              <span className="text-4xl">🛡️</span>
             </div>
           </div>
 
@@ -67,66 +65,56 @@ export default function Login() {
             <span className="text-gradient">Welcome Back</span>
           </h2>
           <p className="text-center text-gray-600 dark:text-gray-400 mb-8">
-            Login to access your security dashboard
+            Login to your WebShield account
           </p>
 
           {/* Login Form */}
           <form onSubmit={handleSubmit} className="space-y-6">
-            
-            {/* Email field */}
             <Input
               label="Email"
               type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
+              value={email}
+              onChange={e => setEmail(e.target.value)}
               placeholder="Enter your email"
-              icon={<HiMail className="w-5 h-5" />}
+              icon={<span className="text-xl">📧</span>}
               required
             />
 
-            {/* Password field */}
             <Input
               label="Password"
               type="password"
-              name="password"
-              value={formData. password}
-              onChange={handleChange}
+              value={password}
+              onChange={e => setPassword(e.target.value)}
               placeholder="Enter your password"
-              icon={<HiLockClosed className="w-5 h-5" />}
+              icon={<span className="text-xl">🔒</span>}
               required
             />
 
-            {/* Forgot password link */}
-            <div className="text-right -mt-4">
-              <Link 
-                to="/forgot-password" 
-                className="text-sm text-primary hover:text-primary-dark transition-colors"
-              >
-                Forgot Password?
-              </Link>
-            </div>
-
-            {/* Error message */}
             {error && (
               <div className="p-3 bg-red-500/10 border border-red-500/50 rounded-lg">
                 <p className="text-sm text-red-500">{error}</p>
               </div>
             )}
 
-            {/* Submit button */}
             <Button type="submit" variant="primary" isLoading={isLoading} className="w-full">
               Login
             </Button>
           </form>
 
-          {/* Signup link */}
-          <p className="text-center text-gray-600 dark:text-gray-400 text-sm mt-6">
-            Don't have an account? {' '}
-            <Link to="/signup" className="text-primary hover:text-primary-dark font-semibold">
-              Sign Up
-            </Link>
-          </p>
+          {/* Links */}
+          <div className="mt-6 space-y-3">
+            <p className="text-center text-gray-600 dark:text-gray-400 text-sm">
+              <Link to="/forgot-password" className="text-primary hover:text-primary-dark">
+                Forgot Password?
+              </Link>
+            </p>
+            <p className="text-center text-gray-600 dark:text-gray-400 text-sm">
+              Don't have an account?{' '}
+              <Link to="/signup" className="text-primary hover:text-primary-dark font-semibold">
+                Sign Up
+              </Link>
+            </p>
+          </div>
         </div>
       </div>
     </div>
