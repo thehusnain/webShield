@@ -1,23 +1,23 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider } from './context/AuthContext';
-import { ThemeProvider } from './context/ThemeContext';
-import ProtectedRoute from './components/ProtectedRoute';
-import AdminRoute from './components/AdminRoute';
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider } from "./context/AuthContext";
+import { ThemeProvider } from "./context/ThemeContext";
+import ProtectedRoute from "./components/ProtectedRoute";
+import AdminRoute from "./components/AdminRoute";
 
 // Pages
-import Home from './pages/Home';
-import Login from './pages/Login';
-import Signup from './pages/Signup';
-import ForgotPassword from './pages/ForgotPassword';
-import Dashboard from './pages/Dashboard';
-import StartScan from './pages/StartScan';
-import ScanProgress from './pages/ScanProgress';
-import ScanResults from './pages/ScanResults';
-import ScanHistory from './pages/ScanHistory';
-import Profile from './pages/Profile';
-import AdminDashboard from './pages/AdminDashboard';
-import ResetPassword from './pages/ResetPassword';
-import AdminScanHistory from './pages/AdminScanHistory';
+import Home from "./pages/Home";
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
+import ForgotPassword from "./pages/ForgotPassword";
+import Dashboard from "./pages/Dashboard";
+import StartScan from "./pages/StartScan";
+import ScanProgress from "./pages/ScanProgress";
+import ScanResults from "./pages/ScanResults";
+import ScanHistory from "./pages/ScanHistory";
+import Profile from "./pages/Profile";
+import AdminDashboard from "./pages/AdminDashboard";
+import ResetPassword from "./pages/ResetPassword";
+
 export default function App() {
   return (
     <ThemeProvider>
@@ -30,22 +30,13 @@ export default function App() {
             <Route path="/signup" element={<Signup />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
-            {/* Protected Routes */}
+
+            {/* Protected Routes (Logged in users) */}
             <Route
               path="/dashboard"
               element={
                 <ProtectedRoute>
                   <Dashboard />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin"
-              element={
-                <ProtectedRoute>
-                  <AdminRoute>
-                    <AdminDashboard />
-                  </AdminRoute>
                 </ProtectedRoute>
               }
             />
@@ -89,27 +80,19 @@ export default function App() {
                 </ProtectedRoute>
               }
             />
-            // Add these routes
+
+            {/* Admin Routes (Admin users only) */}
             <Route
-              path="/admin/history"
+              path="/admin"
               element={
                 <ProtectedRoute>
                   <AdminRoute>
-                    <AdminScanHistory />
+                    <AdminDashboard />
                   </AdminRoute>
                 </ProtectedRoute>
               }
             />
-            <Route
-              path="/admin/users/:userId/history"
-              element={
-                <ProtectedRoute>
-                  <AdminRoute>
-                    <ScanHistory />
-                  </AdminRoute>
-                </ProtectedRoute>
-              }
-            />
+
             {/* Catch-all route */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>

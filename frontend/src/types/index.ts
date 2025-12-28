@@ -6,6 +6,7 @@ export interface User {
   role?: 'user' | 'admin';
   scanLimit?: number;
   scansUsed?: number;
+  agreedToTerms?: boolean;
 }
 
 // Authentication context methods

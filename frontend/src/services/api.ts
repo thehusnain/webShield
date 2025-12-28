@@ -124,6 +124,11 @@ export const authAPI = {
     const response = await api.post('/user/signup', data);
     return response.data;
   },
+    acceptTerms: async () => {
+    const response = await api.post('/user/accept-terms');
+    return response. data;
+  },
+
 
   login: async (data: { email: string; password: string }) => {
     console.log('[authAPI] Logging in with credentials:', { email: data.email });

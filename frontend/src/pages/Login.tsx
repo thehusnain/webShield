@@ -1,47 +1,52 @@
-import { useState, type FormEvent } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
-import { validateEmail } from '../utils/validation';
-import Button from '../components/common/Button';
-import Input from '../components/common/Input';
+import { useState, type FormEvent } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../hooks/useAuth";
+import { validateEmail } from "../utils/validation";
+import Button from "../components/common/Button";
+import Input from "../components/common/Input";
 
 export default function Login() {
   const navigate = useNavigate();
   const { login } = useAuth();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  // In Login.tsx, update the handleSubmit function:
-  // In Login.tsx
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    setError('');
+    setError("");
 
     if (!validateEmail(email)) {
-      setError('Please enter a valid email address');
+      setError("Please enter a valid email address");
       return;
     }
 
     if (!password) {
-      setError('Password is required');
+      setError("Password is required");
       return;
     }
 
     setIsLoading(true);
+
     try {
-      // Get the response from login
+      // Login API
       const response = await login(email, password);
 
-      // Check if user is admin from the response
-      if (response?.user?.role === 'admin') {
-        navigate('/admin');
+      // SAFELY extract role
+      const role = response?.user?.role || "user";
+
+      console.log("[Login] Logged in as role:", role);
+
+      // ROLE-BASED REDIRECT (NO FLICKER)
+      if (role === "admin") {
+        navigate("/admin", { replace: true });
       } else {
-        navigate('/dashboard');
+        navigate("/dashboard", { replace: true });
       }
     } catch (err: any) {
-      setError(err.message);
+      setError(err.message || "Login failed");
     } finally {
       setIsLoading(false);
     }
@@ -68,13 +73,13 @@ export default function Login() {
             Login to your WebShield account
           </p>
 
-          {/* Login Form */}
+          {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-6">
             <Input
               label="Email"
               type="email"
               value={email}
-              onChange={e => setEmail(e.target.value)}
+              onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter your email"
               icon={<span className="text-xl">📧</span>}
               required
@@ -84,7 +89,7 @@ export default function Login() {
               label="Password"
               type="password"
               value={password}
-              onChange={e => setPassword(e.target.value)}
+              onChange={(e) => setPassword(e.target.value)}
               placeholder="Enter your password"
               icon={<span className="text-xl">🔒</span>}
               required
@@ -96,7 +101,12 @@ export default function Login() {
               </div>
             )}
 
-            <Button type="submit" variant="primary" isLoading={isLoading} className="w-full">
+            <Button
+              type="submit"
+              variant="primary"
+              isLoading={isLoading}
+              className="w-full"
+            >
               Login
             </Button>
           </form>
@@ -104,13 +114,19 @@ export default function Login() {
           {/* Links */}
           <div className="mt-6 space-y-3">
             <p className="text-center text-gray-600 dark:text-gray-400 text-sm">
-              <Link to="/forgot-password" className="text-primary hover:text-primary-dark">
+              <Link
+                to="/forgot-password"
+                className="text-primary hover:text-primary-dark"
+              >
                 Forgot Password?
               </Link>
             </p>
             <p className="text-center text-gray-600 dark:text-gray-400 text-sm">
-              Don't have an account?{' '}
-              <Link to="/signup" className="text-primary hover:text-primary-dark font-semibold">
+              Don't have an account?{" "}
+              <Link
+                to="/signup"
+                className="text-primary hover:text-primary-dark font-semibold"
+              >
                 Sign Up
               </Link>
             </p>

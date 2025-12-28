@@ -1,8 +1,10 @@
-import { createContext, useState, useEffect, ReactNode } from 'react';
-import type { ThemeMode, ThemeContextType } from '../types';
+import { createContext, useState, useEffect, ReactNode } from "react";
+import type { ThemeMode, ThemeContextType } from "../types";
 
 // Create context with undefined default
-export const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
+export const ThemeContext = createContext<ThemeContextType | undefined>(
+  undefined
+);
 
 // Props for ThemeProvider component
 interface ThemeProviderProps {
@@ -13,8 +15,8 @@ interface ThemeProviderProps {
 export function ThemeProvider({ children }: ThemeProviderProps) {
   // Get saved theme from localStorage or default to dark
   const [theme, setTheme] = useState<ThemeMode>(() => {
-    const saved = localStorage.getItem('theme');
-    return (saved as ThemeMode) || 'dark';
+    const saved = localStorage.getItem("theme");
+    return (saved as ThemeMode) || "dark";
   });
 
   // Apply theme class to document when theme changes
@@ -22,19 +24,23 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
     const root = window.document.documentElement;
 
     // Remove old theme class
-    root.classList.remove('light', 'dark');
+    root.classList.remove("light", "dark");
 
     // Add new theme class
     root.classList.add(theme);
 
     // Save to localStorage
-    localStorage.setItem('theme', theme);
+    localStorage.setItem("theme", theme);
   }, [theme]);
 
   // Toggle between light and dark
   const toggleTheme = () => {
-    setTheme(prev => (prev === 'light' ? 'dark' : 'light'));
+    setTheme((prev) => (prev === "light" ? "dark" : "light"));
   };
 
-  return <ThemeContext.Provider value={{ theme, toggleTheme }}>{children}</ThemeContext.Provider>;
+  return (
+    <ThemeContext.Provider value={{ theme, toggleTheme }}>
+      {children}
+    </ThemeContext.Provider>
+  );
 }
