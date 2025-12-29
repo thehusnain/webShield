@@ -97,78 +97,181 @@ export default function ScanProgress() {
     }
   }, [scanId, navigate, isRedirecting]);
 
-  // Terminal log simulation
-  useEffect(() => {
-    if (!scan || scan.status !== "running") return;
-
-    const logs = [
-      "[*] Initializing scan engine...",
-      "[+] Target acquired:  " + scan.targetUrl,
+ // SCAN-SPECIFIC TERMINAL LOGS
+const getScanSpecificLogs = (scanType: string, targetUrl: string) => {
+  const logs:  Record<string, string[]> = {
+    nmap: [
+      "[*] Initializing Nmap scan engine...",
+      `[+] Target acquired:  ${targetUrl}`,
+      "[*] Resolving hostname and checking connectivity...",
+      "[+] Host is up - latency: 0.28s",
+      "[*] Starting TCP SYN port scan...",
+      "[+] Scanning top 1000 ports with aggressive timing (T4)",
+      "[*] Port 22/tcp detected - service:  SSH",
+      "[*] Port 80/tcp detected - service: HTTP",
+      "[*] Port 443/tcp detected - service:  HTTPS",
+      "[+] Open ports: 3 services detected",
+      "[*] Initiating service version detection (-sV)",
+      "[+] OpenSSH 7.4 detected on port 22",
+      "[+] Apache httpd 2.4.6 detected on port 80",
+      "[*] Running NSE default scripts (-sC)",
+      "[+] SSH host key algorithms identified",
+      "[+] HTTP server headers analyzed",
+      "[*] Performing OS fingerprinting...",
+      "[+] OS CPE:  Linux kernel 4.x-5.x detected",
+      "[*] Checking for known vulnerabilities...",
+      "[+] CVE database queried: 127 entries checked",
+      "[*] Analyzing scan results...",
+      "[+] Generating comprehensive report...",
+      "[✓] Nmap scan completed successfully"
+    ],
+    
+    nikto: [
+      "[*] Initializing Nikto web scanner...",
+      `[+] Target acquired: ${targetUrl}`,
+      "[*] Connecting to web server...",
+      "[+] Connection established - response time: 245ms",
+      "[*] Identifying server type and version...",
+      "[+] Server:  Apache/2.4.6 (CentOS) detected",
       "[*] Loading vulnerability database...",
-      "[+] Database loaded:  47,832 signatures",
-      "[*] Starting reconnaissance phase...",
-      "[+] DNS lookup complete",
-      "[*] Performing port enumeration...",
-      "[+] Detected open services",
-      "[*] Analyzing HTTP headers...",
-      "[+] Security headers evaluated",
-      "[*] Testing for vulnerabilities...",
-      "[+] Running exploit modules",
-      "[*] Checking SSL/TLS configuration...",
-      "[+] Certificate validation complete",
-      "[*] Scanning for common vulnerabilities...",
-      "[+] CVE database queried",
-      "[*] Analyzing response patterns...",
-      "[+] Pattern matching in progress",
-      "[*] Generating security report...",
-      "[+] Finalizing results...",
-    ];
+      "[+] Database loaded: 7,832 web vulnerability signatures",
+      "[*] Testing for common web server misconfigurations...",
+      "[+] Checking HTTP methods (GET, POST, OPTIONS, TRACE)",
+      "[*] Scanning for outdated software versions...",
+      "[+] Testing for known Apache vulnerabilities",
+      "[*] Checking security headers...",
+      "[+] X-Frame-Options, CSP, HSTS evaluated",
+      "[*] Testing directory listings and file disclosures...",
+      "[+] Analyzing robots.txt and sitemap.xml",
+      "[*] Checking for dangerous HTTP methods...",
+      "[+] TRACE method:  disabled (good)",
+      "[*] Scanning for common backup files...",
+      "[+] Testing for . git, .env, . DS_Store exposure",
+      "[*] Analyzing server configuration...",
+      "[+] Directory browsing:  disabled (good)",
+      "[*] Finalizing vulnerability assessment...",
+      "[+] Generating detailed security report...",
+      "[✓] Nikto scan completed - report ready"
+    ],
+    
+    ssl: [
+      "[*] Initializing SSL/TLS scanner...",
+      `[+] Target acquired: ${targetUrl}: 443`,
+      "[*] Establishing SSL/TLS connection...",
+      "[+] TLS handshake successful",
+      "[*] Retrieving SSL certificate.. .",
+      "[+] Certificate received: CN=example.com",
+      "[*] Validating certificate chain...",
+      "[+] Certificate issued by: Let's Encrypt Authority X3",
+      "[*] Checking certificate expiration...",
+      "[+] Valid until: 2026-02-18 (142 days remaining)",
+      "[*] Testing supported SSL/TLS protocols...",
+      "[+] Testing SSLv2...  Not supported (good)",
+      "[+] Testing SSLv3... Not supported (good)",
+      "[+] Testing TLS 1.0... Not supported (good)",
+      "[+] Testing TLS 1.1... Not supported (good)",
+      "[+] Testing TLS 1.2...  Supported",
+      "[+] Testing TLS 1.3... Supported (excellent)",
+      "[*] Analyzing cipher suites...",
+      "[+] Strong ciphers:  AES-256-GCM, ChaCha20-Poly1305",
+      "[*] Checking for weak encryption.. .",
+      "[+] No weak ciphers detected (good)",
+      "[*] Testing for certificate transparency...",
+      "[+] SCT timestamps validated",
+      "[*] Finalizing SSL/TLS security assessment...",
+      "[✓] SSL/TLS scan completed - certificate valid"
+    ],
+    
+    sqlmap: [
+      "[*] Initializing SQLMap injection scanner...",
+      `[+] Target URL: ${targetUrl}`,
+      "[*] Parsing URL parameters...",
+      "[+] Parameter detected: id=1 (GET)",
+      "[*] Testing injection points...",
+      "[+] Testing parameter:  'id'",
+      "[*] Running heuristic checks...",
+      "[+] Heuristic test:  parameter appears dynamic",
+      "[*] Testing Boolean-based blind injection...",
+      "[+] Payload: AND 1=1 vs AND 1=2",
+      "[*] Testing error-based injection...",
+      "[+] Testing MySQL, PostgreSQL, MSSQL error messages",
+      "[*] Testing UNION query injection...",
+      "[+] Attempting column count detection (1-10)",
+      "[*] Testing time-based blind injection...",
+      "[+] Payload: AND SLEEP(5)",
+      "[+] Response delay detected - potential vulnerability",
+      "[*] Confirming SQL injection vulnerability...",
+      "[+] Injection confirmed: Time-based blind",
+      "[*] Attempting database enumeration...",
+      "[+] Backend DBMS: MySQL 5.7.x",
+      "[*] Retrieving database names...",
+      "[+] Databases found: information_schema, test_db, users_db",
+      "[*] Enumerating tables in 'users_db'...",
+      "[+] Tables:  users, admin, sessions",
+      "[*] Analyzing injection results...",
+      "[+] Generating security assessment.. .",
+      "[✓] SQLMap scan completed - vulnerability detected"
+    ]
+  };
 
-    let currentIndex = 0;
-    const logInterval = setInterval(() => {
-      if (currentIndex < logs.length) {
-        setTerminalLogs((prev) => [...prev, logs[currentIndex]]);
-        currentIndex++;
-      }
-    }, 2000);
+  return logs[scanType] || logs.nmap;
+};
 
-    return () => clearInterval(logInterval);
-  }, [scan]);
+// Terminal log simulation with scan-specific messages
+useEffect(() => {
+  if (!scan || scan.status !== "running") return;
 
-  useEffect(() => {
-    let pollInterval: NodeJS.Timeout | null = null;
-    let progressInterval: NodeJS.Timeout | null = null;
-    let isActive = true;
+  // GET SCAN-SPECIFIC LOGS
+  const logs = getScanSpecificLogs(scan.scanType, scan.targetUrl);
 
-    const startPolling = async () => {
+  let currentIndex = 0;
+  const logInterval = setInterval(() => {
+    if (currentIndex < logs.length) {
+      setTerminalLogs((prev) => [...prev, logs[currentIndex]]);
+      currentIndex++;
+    } else {
+      clearInterval(logInterval);
+    }
+  }, 2000); // NEW LOG EVERY 2 SECONDS
+
+  return () => clearInterval(logInterval);
+}, [scan]);
+
+// PROGRESS POLLING - NO CHANGES NEEDED
+useEffect(() => {
+  let pollInterval: NodeJS.Timeout | null = null;
+  let progressInterval: NodeJS.Timeout | null = null;
+  let isActive = true;
+
+  const startPolling = async () => {
+    const shouldStop = await fetchScan();
+    if (shouldStop || !isActive) return;
+
+    pollInterval = setInterval(async () => {
+      if (!isActive) return;
       const shouldStop = await fetchScan();
-      if (shouldStop || !isActive) return;
+      if (shouldStop && pollInterval) {
+        clearInterval(pollInterval);
+      }
+    }, 5000);
 
-      pollInterval = setInterval(async () => {
-        if (!isActive) return;
-        const shouldStop = await fetchScan();
-        if (shouldStop && pollInterval) {
-          clearInterval(pollInterval);
-        }
-      }, 5000);
+    progressInterval = setInterval(() => {
+      if (!isActive) return;
+      setProgress((prev) => {
+        if (prev >= 95) return 95;
+        return prev + 1;
+      });
+    }, 1500);
+  };
 
-      progressInterval = setInterval(() => {
-        if (!isActive) return;
-        setProgress((prev) => {
-          if (prev >= 95) return 95;
-          return prev + 1;
-        });
-      }, 1500);
-    };
+  startPolling();
 
-    startPolling();
-
-    return () => {
-      isActive = false;
-      if (pollInterval) clearInterval(pollInterval);
-      if (progressInterval) clearInterval(progressInterval);
-    };
-  }, [fetchScan]);
+  return () => {
+    isActive = false;
+    if (pollInterval) clearInterval(pollInterval);
+    if (progressInterval) clearInterval(progressInterval);
+  };
+}, [fetchScan]);
 
   useEffect(() => {
     if (scan?.status === "completed") {

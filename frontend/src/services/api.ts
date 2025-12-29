@@ -274,15 +274,24 @@ export const scanAPI = {
     return response.data;
   },
 
-  cancelScan: async (scanId: string) => {
-    const response = await api.post(`/scan/${scanId}/cancel`);
-    return response.data;
+    cancelScan: async (scanId: string) => {
+    console.log('[scanAPI] Cancel scan request:', scanId);
+    try {
+      const response = await api.post(`/scan/${scanId}/cancel`);
+      console.log('[scanAPI] Cancel scan response:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('[scanAPI] Cancel scan error:', error);
+      throw error;
+    }
   },
+
 
   generateReport: async (scanId: string) => {
     const response = await api.post(`/scan/${scanId}/report/generate`);
     return response.data;
   },
+  
 
   downloadReport: (scanId: string) => {
     window.open(`${API_URL}/scan/${scanId}/report/download`, '_blank');

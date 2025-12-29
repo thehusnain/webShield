@@ -115,7 +115,7 @@ export default function Dashboard() {
                   Scans Used
                 </p>
                 <p className="text-3xl font-bold">
-                  {user?.scansUsed || 0}/{user?.scanLimit || 10}
+                  {user?.usedScan || 0}/{user?.scanLimit || 10}
                 </p>
               </div>
             </div>
@@ -270,7 +270,7 @@ export default function Dashboard() {
         </Card>
 
         {/* Scan Limit Warning */}
-        {user && user.scansUsed >= user.scanLimit * 0.8 && (
+        {user && user.usedScan >= user.scanLimit * 0.8 && (
           <Card className="mt-6 bg-yellow-500/10 border-yellow-500/50">
             <div className="flex items-start gap-3">
               <span className="text-3xl">⚠️</span>
@@ -279,7 +279,7 @@ export default function Dashboard() {
                   Scan Limit Warning
                 </h3>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                  You've used {user.scansUsed} out of {user.scanLimit} scans.
+                  You've used {user.usedScan} out of {user.scanLimit} scans.
                   Contact admin to increase your limit.
                 </p>
               </div>
