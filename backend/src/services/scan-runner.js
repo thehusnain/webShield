@@ -1,6 +1,6 @@
 import { spawn } from "child_process";
 import { Scan } from "../models/scans-mongoose.js";
-import { parseByTool } from "../utils/scan-parsers.js";
+import { parseByTool } from "./scan-parsers.js";
 
 const processes = new Map();
 
