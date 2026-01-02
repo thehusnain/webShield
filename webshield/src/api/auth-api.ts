@@ -21,5 +21,4 @@ export const LogoutUser = () => {
 
 export const Profile = () => {
     return api.get("user/profile")
-
 }

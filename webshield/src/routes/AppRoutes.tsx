@@ -5,6 +5,7 @@ import Login from "../pages/public/Login";
 import Signup from "../pages/public/Signup";
 import Disclaimer from "../pages/public/Disclaimer";
 import Dashboard from "../pages/user/Dashboard";
+import Profile from "../pages/user/Profile";
 
 function AppRoutes() {
   return (
@@ -16,7 +17,7 @@ function AppRoutes() {
         <Route path="/disclaimer" element={<Disclaimer />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/logout" />
-        <Route path="/profile" />
+        <Route path="/profile" element={<Profile/>} />
       </Routes>
     </BrowserRouter>
   );

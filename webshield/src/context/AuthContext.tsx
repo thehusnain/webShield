@@ -1,5 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
-// context/AuthContext.tsx
+
 import React, { createContext, useState, useContext, useEffect, type ReactNode } from 'react';
 import { Profile } from '../api/auth-api';
 
@@ -49,8 +49,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       // Clear local state
       setUser(null);
-      
-      // You might want to call your logout API here
+ 
       // await LogoutUser();
       
       // Clear any stored data
