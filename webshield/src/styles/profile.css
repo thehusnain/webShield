@@ -1,5 +1,6 @@
-/* profile.css - Styles for Profile Page */
+/* PROFILE PAGE STYLES */
 
+/* Main container - full page with gradient background */
 .profile-container {
   min-height: 100vh;
   padding: 40px 20px;
@@ -9,7 +10,7 @@
   align-items: center;
 }
 
-/* Loading State */
+/* Loading spinner animation */
 .profile-loading {
   display: flex;
   flex-direction: column;
@@ -33,7 +34,7 @@
   to { transform: rotate(360deg); }
 }
 
-/* Profile Card */
+/* Profile card - the white/blue box containing everything */
 .profile-card {
   max-width: 500px;
   width: 100%;
@@ -45,12 +46,13 @@
   backdrop-filter: blur(15px);
 }
 
-/* Profile Header */
+/* Profile header with avatar and name */
 .profile-header {
   text-align: center;
   margin-bottom: 30px;
 }
 
+/* Big circle with user's initial */
 .profile-avatar {
   width: 100px;
   height: 100px;
@@ -68,6 +70,9 @@
 .profile-header h2 {
   font-size: 2rem;
   margin-bottom: 5px;
+  background: linear-gradient(90deg, #00d4ff, #66b3ff);
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .user-email {
@@ -75,11 +80,12 @@
   font-size: 1rem;
 }
 
-/* Profile Info Section */
+/* Information section - where all user details are listed */
 .profile-info {
   margin-bottom: 30px;
 }
 
+/* Each row of information (label + value) */
 .info-item {
   display: flex;
   justify-content: space-between;
@@ -101,7 +107,7 @@
   font-weight: 600;
 }
 
-/* Special Styling for Role */
+/* Special badge for user role */
 .role-badge {
   background: rgba(0, 212, 255, 0.1);
   padding: 4px 12px;
@@ -109,18 +115,18 @@
   color: #00d4ff;
 }
 
-/* Scan Usage Percentage */
+/* Percentage text for scan usage */
 .usage-percentage {
   margin-left: 10px;
   font-size: 0.9rem;
   font-weight: normal;
 }
 
-/* Terms Status Colors */
+/* Color coding for terms status */
 .terms-yes { color: #69f0ae; }
 .terms-no { color: #ffd54f; }
 
-/* Action Buttons */
+/* Button container at bottom */
 .profile-actions {
   display: flex;
   flex-wrap: wrap;
@@ -129,6 +135,7 @@
   margin-top: 30px;
 }
 
+/* Base button style */
 .profile-actions button {
   padding: 12px 24px;
   border-radius: 8px;
@@ -138,30 +145,34 @@
   border: none;
 }
 
+/* Back button - blue theme */
 .btn-back {
   background: rgba(0, 212, 255, 0.1);
   color: #00d4ff;
   border: 1px solid rgba(0, 212, 255, 0.3) !important;
 }
 
+/* History button - lighter blue */
 .btn-history {
   background: rgba(0, 136, 255, 0.1);
   color: #66b3ff;
   border: 1px solid rgba(0, 136, 255, 0.3) !important;
 }
 
+/* Logout button - red theme */
 .btn-logout {
   background: rgba(255, 65, 108, 0.1);
   color: #ff6b6b;
   border: 1px solid rgba(255, 65, 108, 0.3) !important;
 }
 
+/* Button hover effect */
 .profile-actions button:hover {
   transform: translateY(-2px);
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
 }
 
-/* Responsive Design */
+/* MOBILE RESPONSIVENESS - Adjust for smaller screens */
 @media (max-width: 600px) {
   .profile-card {
     padding: 25px 20px;

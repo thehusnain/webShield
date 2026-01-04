@@ -1,38 +1,47 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext";
-import { Profile as getProfile } from "../../api/auth-api";
-import "../../styles/profile.css";
+// 1. IMPORT STATEMENTS - Bring in the tools we need
+import { useState, useEffect } from "react"; // React hooks for state and side effects
+import { useNavigate } from "react-router-dom"; // For navigating between pages
+import { useAuth } from "../../context/AuthContext"; // Access user data and logout function
+import { Profile as getProfile } from "../../api/auth-api"; // API call (renamed to avoid naming conflict)
+import "../../styles/profile.css"; // CSS styles for this page
 
+// CREATE THE PROFILE COMPONENT
 const Profile = () => {
-  const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  // INITIALIZE HOOKS - Set up navigation and authentication
+  const navigate = useNavigate(); // Hook to navigate to different pages
+  const { user, logout } = useAuth(); // Get current user data and logout function from context
 
-  const [userData, setUserData] = useState(user);
-  const [loading, setLoading] = useState(false);
+  // STATE MANAGEMENT - Create variables that can change and trigger UI updates
+  const [userData, setUserData] = useState(user); // Store user data, start with data from context
+  const [loading, setLoading] = useState(false); // Track if data is loading (show spinner)
 
+  // SIDE EFFECT - Run code when component loads
   useEffect(() => {
-    fetchProfile();
-  }, []);
+    fetchProfile(); // Call function to get user data when page opens
+  }, []); // Empty array means "run only once"
 
+  // FUNCTION TO FETCH USER DATA FROM BACKEND
   const fetchProfile = async () => {
     try {
-      setLoading(true);
-      const respone = getProfile();
-      if (respone.data.success) {
-        setUserData(respone.data.user);
+      setLoading(true); // Show loading state
+      const response = await getProfile(); // Call your API function
+      if (response.data.success) {
+        setUserData(response.data.user); // Save user data to state
       }
     } catch (error) {
-      console.error("Failed to fetch profile", error);
+      console.error("Failed to fetch profile:", error);
     } finally {
-      setLoading(false);
+      setLoading(false); // Hide loading state
     }
   };
+
+  // LOGOUT FUNCTION
   const handleLogout = () => {
-    logout();
-    navigate("/");
+    logout(); // Call logout from AuthContext
+    navigate("/"); // Redirect to home page
   };
 
+  // LOADING STATE - Show spinner while data is loading
   if (loading) {
     return (
       <div className="profile-loading">
@@ -42,29 +51,29 @@ const Profile = () => {
     );
   }
 
+  // MAIN UI RENDER 
   return (
     <div className="profile-container">
-      {/* Main Profile Card */}
       <div className="profile-card">
-        {/* Header with user avatar */}
+        {/* USER PROFILE HEADER WITH AVATAR */}
         <div className="profile-header">
           <div className="profile-avatar">
-            {/* Show first letter of username */}
+            {/* Show first letter of username in big circle */}
             {userData?.username?.charAt(0).toUpperCase()}
           </div>
           <h2 className="text-gradient">{userData?.username}</h2>
           <p className="user-email">{userData?.email}</p>
         </div>
 
-        {/* User Information Section */}
+        {/* USER INFORMATION SECTION */}
         <div className="profile-info">
-          {/* User ID */}
+          {/* USER ID */}
           <div className="info-item">
             <span className="info-label">User ID:</span>
             <span className="info-value">{userData?.userId}</span>
           </div>
 
-          {/* Account Type */}
+          {/* ACCOUNT TYPE (User/Admin) */}
           <div className="info-item">
             <span className="info-label">Account Type:</span>
             <span className="info-value role-badge">
@@ -72,11 +81,11 @@ const Profile = () => {
             </span>
           </div>
 
-          {/* Scan Usage */}
+          {/* SCAN USAGE (How many scans used vs limit) */}
           <div className="info-item">
             <span className="info-label">Scan Usage:</span>
             <span className="info-value">
-              {userData?.usedScan || 0} / {userData?.scanLimit || 15}
+              {userData?.usedScan || 0} / {userData?.scanLimit || 10}
               <span className="usage-percentage">
                 (
                 {userData
@@ -87,7 +96,7 @@ const Profile = () => {
             </span>
           </div>
 
-          {/* Member Since */}
+          {/* MEMBER SINCE DATE */}
           <div className="info-item">
             <span className="info-label">Member Since:</span>
             <span className="info-value">
@@ -97,7 +106,7 @@ const Profile = () => {
             </span>
           </div>
 
-          {/* Terms Accepted Status */}
+          {/* TERMS ACCEPTED STATUS */}
           <div className="info-item">
             <span className="info-label">Terms Accepted:</span>
             <span
@@ -110,7 +119,7 @@ const Profile = () => {
           </div>
         </div>
 
-        {/* Action Buttons */}
+        {/* ACTION BUTTONS */}
         <div className="profile-actions">
           <button onClick={() => navigate("/dashboard")} className="btn-back">
             ← Back to Dashboard

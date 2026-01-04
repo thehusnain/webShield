@@ -1,11 +1,66 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "../../styles/disclaimer.css"; // Add this import
+import { useAuth } from "../../context/AuthContext";
+import "../../styles/disclaimer.css";
 
 const Disclaimer = () => {
   const navigate = useNavigate();
+  const { checkAuth } = useAuth();
+  const [error, setError] = useState("");
+  const [checkboxError, setCheckboxError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleAgree = () => {
-    navigate("/dashboard");
+  const handleAgree = async () => {
+    // Clear ALL errors
+    setError("");
+    setCheckboxError("");
+
+    // 1. Check the checkbox
+    const checkbox = document.getElementById('agree-checkbox');
+    if (!checkbox || !(checkbox as HTMLInputElement).checked) {
+      // Show error RIGHT BELOW the checkbox
+      setCheckboxError("Please check the agreement box to continue");
+      
+      // Visual feedback
+      if (checkbox) {
+        checkbox.style.outline = "2px solid #ff6b6b";
+        checkbox.style.outlineOffset = "2px";
+        setTimeout(() => {
+          if (checkbox) {
+            checkbox.style.outline = "";
+            checkbox.style.outlineOffset = "";
+          }
+        }, 2000);
+      }
+      return;
+    }
+
+    // 2. Proceed with agreement
+    try {
+      setIsLoading(true);
+      const response = await fetch('http://localhost:4000/user/accept-terms', {
+        method: 'POST',
+        credentials: 'include'
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        await checkAuth();
+        // Show success message
+        setError("✅ Terms accepted! Redirecting to dashboard...");
+        setTimeout(() => {
+          navigate("/dashboard");
+        }, 1500);
+      } else {
+        setError(data.error || 'Failed to accept terms. Please try again.');
+      }
+    } catch (error) {
+      setError("Network error. Please try again.");
+      console.error('Error accepting terms:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
   
   const handleDisagree = () => {
@@ -20,6 +75,13 @@ const Disclaimer = () => {
           <h2>Important Legal Disclaimer</h2>
           <p>Please read this carefully before proceeding</p>
         </div>
+        
+        {/* General error shows at top (for network/backend errors) */}
+        {error && (
+          <div className={`disclaimer-message ${error.includes("✅") ? "disclaimer-success" : "disclaimer-error"}`}>
+            {error}
+          </div>
+        )}
         
         <div className="disclaimer-content">
           <div className="disclaimer-section">
@@ -75,23 +137,41 @@ const Disclaimer = () => {
           </div>
         </div>
 
+        {/* Checkbox section with error below */}
         <div className="checkbox-container">
-          <input type="checkbox" id="agree-checkbox" required />
-          <label htmlFor="agree-checkbox">
-            I have read, understood, and agree to the terms above
-          </label>
+          <div className="checkbox-wrapper">
+            <input 
+              type="checkbox" 
+              id="agree-checkbox" 
+              required 
+              disabled={isLoading}
+            />
+            <label htmlFor="agree-checkbox" className="checkbox-label">
+              I have read, understood, and agree to the terms above
+            </label>
+          </div>
+          
+          {/* Checkbox error shows RIGHT BELOW the checkbox */}
+          {checkboxError && (
+            <div className="checkbox-error">
+              {checkboxError}
+            </div>
+          )}
         </div>
 
+        {/* Action buttons */}
         <div className="disclaimer-actions">
           <button 
             className="disclaimer-button agree-button" 
             onClick={handleAgree}
+            disabled={isLoading}
           >
-            I Agree & Continue
+            {isLoading ? "Processing..." : "I Agree & Continue"}
           </button>
           <button 
             className="disclaimer-button disagree-button" 
             onClick={handleDisagree}
+            disabled={isLoading}
           >
             I Do Not Agree
           </button>
