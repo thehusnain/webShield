@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 // components/landing/ToolCards.tsx
 import "./ToolCards.css";
 
@@ -51,7 +52,7 @@ const ToolCards = () => {
       </p>
       
       <div className="tools-grid">
-        {tools.map((tool, index) => (
+        {tools.map((tool, _index) => (
           <div 
             key={tool.name}
             className="tool-card"
