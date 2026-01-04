@@ -1,50 +1,134 @@
+// pages/public/Landing.tsx
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import HeroSection from "../../components/landing/HeroSection";
+import ToolCards from "../../components/landing/ToolCards";
 import "../../styles/landing.css";
 
-function Landing() {
+const Landing = () => {
+  const [scrollY, setScrollY] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrollY(window.scrollY);
+    };
+    
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   return (
-    <div className="landing">
-      <div className="floating-elements">
-        <div className="floating-element" style={{width: '100px', height: '100px', top: '10%', left: '5%'}}></div>
-        <div className="floating-element" style={{width: '150px', height: '150px', top: '60%', right: '10%'}}></div>
-        <div className="floating-element" style={{width: '80px', height: '80px', bottom: '20%', left: '20%'}}></div>
-      </div>
-      
-      <div className="landing-content">
-        <h1>WebShield</h1>
-        <p className="landing-tagline">Your Cybersecurity Shield for Web Protection</p>
-        <p className="landing-description">
-          WebShield is an advanced cybersecurity tool that scans websites for common 
-          vulnerabilities using professional security scanners like Nmap, Nikto, SQLMap, 
-          and SSLScan. Get easy-to-understand vulnerability reports and protect your 
-          web applications.
-        </p>
-        
-        <a href="/signup" className="cta-button">
-          Get Started Free
-        </a>
-        
-        <div className="features-grid">
-          <div className="feature-card">
-            <div className="feature-icon">🔒</div>
-            <h3>Vulnerability Scanning</h3>
-            <p>Scan websites for common security vulnerabilities using industry-standard tools</p>
+    <div className="landing-page">
+      {/* Navigation */}
+      <nav className="landing-nav" style={{ 
+        background: scrollY > 50 ? 'rgba(10, 25, 41, 0.95)' : 'transparent',
+        backdropFilter: scrollY > 50 ? 'blur(10px)' : 'none'
+      }}>
+        <div className="nav-container">
+          <div className="nav-logo">
+            <span className="logo-icon">🛡️</span>
+            <span className="logo-text">WebShield</span>
           </div>
           
-          <div className="feature-card">
-            <div className="feature-icon">📊</div>
-            <h3>Detailed Reports</h3>
-            <p>Get comprehensive, easy-to-understand reports with actionable insights</p>
-          </div>
-          
-          <div className="feature-card">
-            <div className="feature-icon">⚡</div>
-            <h3>Fast & Secure</h3>
-            <p>Perform scans quickly while maintaining the highest security standards</p>
+          <div className="nav-links">
+            <a href="#features" className="nav-link">Features</a>
+            <a href="#tools" className="nav-link">Tools</a>
+            <Link to="/login" className="nav-button">
+              Sign In
+            </Link>
           </div>
         </div>
-      </div>
+      </nav>
+      {/* Hero Section */}
+      <HeroSection />
+
+      {/* Tools Section */}
+      <section id="tools" className="section-wrapper">
+        <ToolCards />
+      </section>
+
+      {/* Features Section */}
+      <section id="features" className="features-section">
+        <div className="section-container">
+          <h2 className="section-title">
+            <span className="title-underline">Why Choose WebShield?</span>
+          </h2>
+          
+          <div className="features-grid">
+            <div className="feature-card">
+              <div className="feature-icon">⚡</div>
+              <h3>Fast Scanning</h3>
+              <p>Complete vulnerability assessments in minutes, not hours</p>
+            </div>
+            
+            <div className="feature-card">
+              <div className="feature-icon">🎯</div>
+              <h3>Accurate Results</h3>
+              <p>Professional-grade tools with minimal false positives</p>
+            </div>
+            
+            <div className="feature-card">
+              <div className="feature-icon">📊</div>
+              <h3>Detailed Reports</h3>
+              <p>Comprehensive PDF reports with actionable insights</p>
+            </div>
+            
+            <div className="feature-card">
+              <div className="feature-icon">🔐</div>
+              <h3>Secure & Private</h3>
+              <p>Your scans and data are encrypted and confidential</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="cta-section">
+        <div className="cta-container">
+          <h2 className="cta-title">Ready to Secure Your Websites?</h2>
+          <Link to="/signup" className="cta-button large">
+            <span className="button-text">Start Free Trial</span>
+            <span className="button-sparkle">✨</span>
+          </Link>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="landing-footer">
+        <div className="footer-container">
+          <div className="footer-brand">
+            <div className="footer-logo">
+              <span className="logo-icon">🛡️</span>
+              <span className="logo-text">WebShield</span>
+            </div>
+            <p className="footer-tagline">
+              Cybersecurity made accessible for everyone
+            </p>
+          </div>
+          
+          <div className="footer-links">
+            <div className="footer-column">
+              <h4>Product</h4>
+              <a href="#features">Features</a>
+              <a href="#tools">Tools</a>
+            </div>
+          
+            
+            <div className="footer-column">
+              <h4>Connect</h4>
+              <a href="https://github.com/thehusnain" target="_blank" rel="noreferrer">GitHub</a>
+              <a href="https://twitter.com" target="_blank" rel="noreferrer">Twitter</a>
+              <a href="mailto:support@webshield.com">Support</a>
+            </div>
+          </div>
+        </div>
+        
+        <div className="footer-bottom">
+          <p>© 2026 WebShield..</p>
+        </div>
+      </footer>
     </div>
   );
-}
+};
 
 export default Landing;
