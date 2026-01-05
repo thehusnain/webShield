@@ -32,7 +32,7 @@ export async function loginValidation(req, res, next) {
   if (!identifier) {
     return res.status(400).json({
       success: false,
-      error: 'Email or username is required',
+      error: 'Please fill the Fields',
     });
   }
 

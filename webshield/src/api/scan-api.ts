@@ -1,16 +1,12 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // api/scan.api.ts - UPDATED to match your backend routes
 import api from "./axios";
 
 // Start a new scan - POST /scan/start
-export const startScan = (data: {
-  url: string;
-  tool: string; // 'nmap' | 'nikto' | 'sqlmap' | 'sslscan'
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  options?: any;
-}) => {
+// src/api/scan-api.ts
+export const startScan = (data: { targetUrl: string; scanType: string; options?: any }) => {
   return api.post("/scan/start", data);
 };
-
 // Get scan history - GET /scan/history
 export const getScanHistory = () => {
   return api.get("/scan/history");
@@ -34,11 +30,15 @@ export const generateAIReportForScan = (scanId: string) => {
 // Download report - GET /scan/:id/report/download
 export const downloadReport = (scanId: string) => {
   return api.get(`/scan/${scanId}/report/download`, {
-    responseType: 'blob' // Important for file downloads
+    responseType: "arraybuffer", // important for PDF bytes
   });
 };
 
 // View report - GET /scan/:id/report/view
+// If your backend also streams PDF here, keep arraybuffer.
+// If it returns HTML/text, you can switch this to 'text'. Start with arraybuffer:
 export const viewReport = (scanId: string) => {
-  return api.get(`/scan/${scanId}/report/view`);
+  return api.get(`/scan/${scanId}/report/view`, {
+    responseType: "arraybuffer",
+  });
 };

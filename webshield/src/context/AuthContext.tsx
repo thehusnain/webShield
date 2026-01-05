@@ -1,7 +1,12 @@
 /* eslint-disable react-refresh/only-export-components */
-
-import React, { createContext, useState, useContext, useEffect, type ReactNode } from 'react';
-import { Profile } from '../api/auth-api';
+import React, {
+  createContext,
+  useState,
+  useContext,
+  useEffect,
+  type ReactNode,
+} from "react";
+import { Profile as getProfile, LogoutUser } from "../api/auth-api";
 
 interface User {
   _id: string;
@@ -19,8 +24,9 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   login: (userData: User) => void;
-  logout: () => void;
+  logout: () => Promise<void>;
   checkAuth: () => Promise<void>;
+  refreshUser: () => Promise<void>; // alias of checkAuth
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -28,7 +34,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth must be used within AuthProvider');
+    throw new Error("useAuth must be used within AuthProvider");
   }
   return context;
 };
@@ -47,30 +53,27 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const logout = async () => {
     try {
-      // Clear local state
-      setUser(null);
- 
-      // await LogoutUser();
-      
-      // Clear any stored data
-      sessionStorage.clear();
-      localStorage.removeItem('authToken');
+      await LogoutUser(); // clear cookie on server
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error("Logout error:", error);
+    } finally {
+      setUser(null);
+      sessionStorage.clear();
+      localStorage.removeItem("authToken");
     }
   };
 
   const checkAuth = async () => {
     try {
       setLoading(true);
-      const response = await Profile();
+      const response = await getProfile();
       if (response.data.success) {
         setUser(response.data.user);
       } else {
         setUser(null);
       }
     } catch (error) {
-      console.error('Auth check failed:', error);
+      console.error("Auth check failed:", error);
       setUser(null);
     } finally {
       setLoading(false);
@@ -82,7 +85,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout, checkAuth }}>
+    <AuthContext.Provider
+      value={{ user, loading, login, logout, checkAuth, refreshUser: checkAuth }}
+    >
       {children}
     </AuthContext.Provider>
   );
