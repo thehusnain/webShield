@@ -1,6 +1,3 @@
-// utils/validators.ts - ENHANCED VERSION
-
-// Username validation with specific messages
 export const validateUsername = (username: string): { isValid: boolean; message: string } => {
   if (username.length < 3) {
     return { isValid: false, message: "Username must be at least 3 characters" };
@@ -14,7 +11,6 @@ export const validateUsername = (username: string): { isValid: boolean; message:
   return { isValid: true, message: "" };
 };
 
-// Email validation with specific messages
 export const validateEmail = (email: string): { isValid: boolean; message: string } => {
   if (!email) {
     return { isValid: false, message: "Email is required" };
@@ -28,7 +24,6 @@ export const validateEmail = (email: string): { isValid: boolean; message: strin
   return { isValid: true, message: "" };
 };
 
-// Password validation with detailed feedback
 export const validatePassword = (password: string): { 
   isValid: boolean; 
   message: string;
@@ -48,8 +43,6 @@ export const validatePassword = (password: string): {
     // eslint-disable-next-line no-useless-escape
     special: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password),
   };
-  
-  // Build specific error message
   let message = "";
   if (!checks.length) {
     message = "Password must be at least 8 characters";
@@ -71,8 +64,6 @@ export const validatePassword = (password: string): {
     details: checks
   };
 };
-
-// Keep your existing functions for backward compatibility
 export const isValidUsername = (username: string) => validateUsername(username).isValid;
 export const isValidEmail = (email: string) => validateEmail(email).isValid;
 export const isStrongPassword = (password: string) => validatePassword(password).isValid;

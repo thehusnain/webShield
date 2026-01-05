@@ -26,11 +26,13 @@ const Disclaimer = () => {
       setIsLoading(true);
       const response = await acceptTerms();
       if (response.data.success) {
-        setError("✅ Terms accepted! Redirecting to dashboard...");
-        await checkAuth(); // refresh user so agreedToTerms = true
+        setError("Terms accepted! ");
+        await checkAuth();
         setTimeout(() => navigate("/dashboard", { replace: true }), 600);
       } else {
-        setError(response.data.error || "Failed to accept terms. Please try again.");
+        setError(
+          response.data.error || "Failed to accept terms. Please try again."
+        );
       }
     } catch (e) {
       setError("Network error. Please try again.");
@@ -65,14 +67,18 @@ const Disclaimer = () => {
           <div className="disclaimer-section">
             <h3>Purpose of Tools</h3>
             <p>
-              All tools and information provided on WebShield are intended strictly for
+              All tools and information provided on WebShield are intended
+              strictly for
               <strong> educational and ethical hacking purposes</strong> only.
             </p>
           </div>
 
           <div className="disclaimer-section">
             <h3>Authorized Use Only</h3>
-            <p>Users are prohibited from using tools for illegal or unauthorized activity:</p>
+            <p>
+              Users are prohibited from using tools for illegal or unauthorized
+              activity:
+            </p>
             <ul>
               <li>Accessing systems without explicit permission</li>
               <li>Data theft or unauthorized access</li>
@@ -84,24 +90,25 @@ const Disclaimer = () => {
           <div className="disclaimer-section">
             <h3>No Liability</h3>
             <p>
-              We disclaim liability for harm resulting from misuse. Software is provided "as is"
-              without warranty, to the extent permitted by law.
+              We disclaim liability for harm resulting from misuse. Software is
+              provided "as is" without warranty, to the extent permitted by law.
             </p>
           </div>
 
           <div className="disclaimer-section">
             <h3>User Responsibility</h3>
             <p>
-              You are solely responsible for following all applicable laws and ensuring proper
-              authorization before testing any system or network.
+              You are solely responsible for following all applicable laws and
+              ensuring proper authorization before testing any system or
+              network.
             </p>
           </div>
 
           <div className="disclaimer-section">
             <h3>Security Risks</h3>
             <p>
-              Some tools may be flagged by antivirus. Test in a controlled environment and use
-              responsibly.
+              Some tools may be flagged by antivirus. Test in a controlled
+              environment and use responsibly.
             </p>
           </div>
         </div>
@@ -119,7 +126,9 @@ const Disclaimer = () => {
               I have read, understood, and agree to the terms above
             </label>
           </div>
-          {checkboxError && <div className="checkbox-error">{checkboxError}</div>}
+          {checkboxError && (
+            <div className="checkbox-error">{checkboxError}</div>
+          )}
         </div>
 
         <div className="disclaimer-actions">

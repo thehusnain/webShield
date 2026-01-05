@@ -119,12 +119,11 @@ function Signup() {
 
       if (response.data.success) {
         // Show success message in your UI
-        setFormError("✅ Account created successfully! Redirecting to login...");
+        setFormError("Account created successfully.");
         setTimeout(() => navigate("/login"), 2000);
       }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
-      // Handle specific backend errors
       const backendError = error?.response?.data?.error || "";
       
       if (backendError.includes("username") || backendError.includes("Username")) {

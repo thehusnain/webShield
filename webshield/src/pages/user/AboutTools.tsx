@@ -11,7 +11,7 @@ const toolData = [
     tips: [
       "Use -sV to detect service versions.",
       "Use -Pn to skip host discovery if ICMP is blocked.",
-      "Keep scans within permissioned scope."
+      "Keep scans within permissioned scope.",
     ],
   },
   {
@@ -24,7 +24,7 @@ const toolData = [
     tips: [
       "Run after identifying the exact host/port.",
       "Pair with HTTPS (set the correct port).",
-      "Review false positives—some findings are informational."
+      "Review false positives—some findings are informational.",
     ],
   },
   {
@@ -37,7 +37,7 @@ const toolData = [
     tips: [
       "Start with low risk/level to reduce impact.",
       "Use --batch cautiously; review prompts in manual mode.",
-      "Only test targets you own or are authorized to assess."
+      "Only test targets you own or are authorized to assess.",
     ],
   },
   {
@@ -50,7 +50,7 @@ const toolData = [
     tips: [
       "Look for weak ciphers/protocols (SSLv2/3, old TLS).",
       "Prefer modern suites (TLS 1.2/1.3, strong ciphers).",
-      "Re-run after server config changes to verify fixes."
+      "Re-run after server config changes to verify fixes.",
     ],
   },
 ];
@@ -62,7 +62,8 @@ const AboutTools = () => {
         <div>
           <h1 className="text-gradient">About Security Tools</h1>
           <p className="about-sub">
-            What each scanner does, when to use it, and quick best-practice tips.
+            What each scanner does, when to use it, and quick best-practice
+            tips.
           </p>
         </div>
       </div>
@@ -99,7 +100,8 @@ const AboutTools = () => {
       </div>
 
       <div className="legal-note">
-        ✅ Use these tools only on systems you own or have explicit permission to test.
+        Use these tools only on systems you own or have explicit permission to
+        test.
       </div>
     </div>
   );

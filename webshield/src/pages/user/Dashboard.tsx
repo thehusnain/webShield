@@ -42,9 +42,13 @@ const Dashboard = () => {
   const metrics = useMemo(() => {
     const total = scans.length;
     const completed = scans.filter((s) => s.status === "completed").length;
-    const pending = scans.filter((s) => s.status === "pending" || s.status === "running").length;
+    const pending = scans.filter(
+      (s) => s.status === "pending" || s.status === "running"
+    ).length;
     const vulnerabilities = scans.reduce((sum, s) => {
-      const vulns = (s.results?.vulnerabilities || s.results?.vulns || []) as any[];
+      const vulns = (s.results?.vulnerabilities ||
+        s.results?.vulns ||
+        []) as any[];
       return sum + (Array.isArray(vulns) ? vulns.length : 0);
     }, 0);
     const successRate = total ? Math.round((completed / total) * 100) : 0;
@@ -53,7 +57,11 @@ const Dashboard = () => {
 
   const recent = useMemo(() => {
     return [...scans]
-      .sort((a, b) => new Date(b.createdAt || "").getTime() - new Date(a.createdAt || "").getTime())
+      .sort(
+        (a, b) =>
+          new Date(b.createdAt || "").getTime() -
+          new Date(a.createdAt || "").getTime()
+      )
       .slice(0, 5);
   }, [scans]);
 
@@ -78,13 +86,20 @@ const Dashboard = () => {
         <div className="top-left">
           <div className="logo-circle">W</div>
           <div>
-            <h2 className="text-gradient">WebShield Dashboard</h2>
+            <h2 className="text-color">WebShield Dashboard</h2>
             <p className="welcome-text">Ready to secure some websites?</p>
           </div>
         </div>
         <div className="top-right">
-          <button className="pill-btn ghost" onClick={() => navigate("/profile")}>👤 Profile</button>
-          <button className="pill-btn danger" onClick={handleLogout}>🔓 Logout</button>
+          <button
+            className="pill-btn ghost"
+            onClick={() => navigate("/profile")}
+          >
+            👤 Profile
+          </button>
+          <button className="pill-btn danger" onClick={handleLogout}>
+            🔓 Logout
+          </button>
         </div>
       </div>
 
@@ -102,7 +117,10 @@ const Dashboard = () => {
             <div className="quick-sub">Launch a new security scan</div>
           </div>
         </button>
-        <button className="quick-card" onClick={() => navigate("/scan-history")}>
+        <button
+          className="quick-card"
+          onClick={() => navigate("/scan-history")}
+        >
           <div className="quick-icon">📋</div>
           <div className="quick-text">
             <div className="quick-title">Scan History</div>
@@ -131,7 +149,9 @@ const Dashboard = () => {
         </div>
         <div className="stat-card">
           <div className="stat-icon">🎯</div>
-          <div className="stat-value">{loading ? "…" : metrics.vulnerabilities}</div>
+          <div className="stat-value">
+            {loading ? "…" : metrics.vulnerabilities}
+          </div>
           <div className="stat-label">Vulnerabilities Found</div>
         </div>
       </div>
@@ -139,8 +159,16 @@ const Dashboard = () => {
       <h3 className="section-title">Available Security Tools</h3>
       <div className="tools-grid legacy-look">
         {[
-          { icon: "N", name: "Nmap", desc: "Network discovery & port scanning" },
-          { icon: "N", name: "Nikto", desc: "Web server vulnerability scanner" },
+          {
+            icon: "N",
+            name: "Nmap",
+            desc: "Network discovery & port scanning",
+          },
+          {
+            icon: "N",
+            name: "Nikto",
+            desc: "Web server vulnerability scanner",
+          },
           { icon: "S", name: "SQLMap", desc: "SQL injection detection" },
           { icon: "S", name: "SSLScan", desc: "SSL/TLS checker" },
         ].map((t) => (
@@ -150,7 +178,10 @@ const Dashboard = () => {
               <h3 className="tool-title legacy">{t.name}</h3>
             </div>
             <p className="tool-description legacy">{t.desc}</p>
-            <button className="tool-button legacy" onClick={() => navigate("/start-scan")}>
+            <button
+              className="tool-button legacy"
+              onClick={() => navigate("/start-scan")}
+            >
               Use {t.name} Scanner
             </button>
           </div>
@@ -164,7 +195,13 @@ const Dashboard = () => {
           <div className="scan-item" key={s._id}>
             <div>
               <strong>{s.targetUrl ?? s.url ?? "Unknown target"}</strong>
-              <p style={{ color: "#88ccff", fontSize: "0.9rem", marginTop: "5px" }}>
+              <p
+                style={{
+                  color: "#88ccff",
+                  fontSize: "0.9rem",
+                  marginTop: "5px",
+                }}
+              >
                 {(s.scanType ?? s.tool ?? "").toUpperCase() || "—"} •{" "}
                 {s.createdAt ? new Date(s.createdAt).toLocaleString() : "N/A"}
               </p>

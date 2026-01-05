@@ -2,7 +2,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getScanHistory } from "../../api/scan-api";
-// import type { ScanItem } from "../../utils/types"; // optional; if you re-enable, ensure types.ts exports it
 import "../../styles/scan-result.css";
 
 const ScanHistory = () => {
@@ -18,7 +17,7 @@ const ScanHistory = () => {
         setScans(Array.isArray(arr) ? arr : []);
       } catch (e: any) {
         setError(e?.response?.data?.error || "Failed to load scan history");
-        setScans([]); // avoid map crash
+        setScans([]); 
       }
     };
     load();

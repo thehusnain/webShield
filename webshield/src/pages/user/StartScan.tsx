@@ -52,7 +52,6 @@ const StartScan = () => {
 
     try {
       setLoading(true);
-      // Map UI choice to backend expected scanType (sslscan -> ssl)
       const mappedScanType = tool === "sslscan" ? "ssl" : tool;
 
       const scanData = {
@@ -133,7 +132,7 @@ const StartScan = () => {
           <div className="form-group">
             <label className="form-label">
               Target Website URL
-              <span className="tooltip" data-tooltip="Enter the full URL of the website you want to scan">ℹ️</span>
+              <span className="tooltip" data-tooltip="Enter the full URL of the website you want to scan"></span>
             </label>
             <div className="input-with-icon">
               <span className="input-icon">🌐</span>

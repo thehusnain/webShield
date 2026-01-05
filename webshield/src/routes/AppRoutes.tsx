@@ -110,7 +110,6 @@ function AppRoutes() {
 />
 
 <Route path="/about-tools" element={<AboutTools />} />
-        {/* TODO: add scan pages and admin pages later */}
       </Routes>
     </BrowserRouter>
   );

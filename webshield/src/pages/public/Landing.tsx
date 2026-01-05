@@ -1,10 +1,8 @@
-// pages/public/Landing.tsx
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import HeroSection from "../../components/landing/HeroSection";
 import ToolCards from "../../components/landing/ToolCards";
 import "../../styles/landing.css";
-
 const Landing = () => {
   const [scrollY, setScrollY] = useState(0);
 
@@ -12,7 +10,7 @@ const Landing = () => {
     const handleScroll = () => {
       setScrollY(window.scrollY);
     };
-    
+
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
@@ -20,19 +18,26 @@ const Landing = () => {
   return (
     <div className="landing-page">
       {/* Navigation */}
-      <nav className="landing-nav" style={{ 
-        background: scrollY > 50 ? 'rgba(10, 25, 41, 0.95)' : 'transparent',
-        backdropFilter: scrollY > 50 ? 'blur(10px)' : 'none'
-      }}>
+      <nav
+        className="landing-nav"
+        style={{
+          background: scrollY > 50 ? "rgba(10, 25, 41, 0.95)" : "transparent",
+          backdropFilter: scrollY > 50 ? "blur(10px)" : "none",
+        }}
+      >
         <div className="nav-container">
           <div className="nav-logo">
             <span className="logo-icon">🛡️</span>
             <span className="logo-text">WebShield</span>
           </div>
-          
+
           <div className="nav-links">
-            <a href="#features" className="nav-link">Features</a>
-            <a href="#tools" className="nav-link">Tools</a>
+            <a href="#features" className="nav-link">
+              Features
+            </a>
+            <a href="#tools" className="nav-link">
+              Tools
+            </a>
             <Link to="/login" className="nav-button">
               Sign In
             </Link>
@@ -53,26 +58,26 @@ const Landing = () => {
           <h2 className="section-title">
             <span className="title-underline">Why Choose WebShield?</span>
           </h2>
-          
+
           <div className="features-grid">
             <div className="feature-card">
               <div className="feature-icon">⚡</div>
               <h3>Fast Scanning</h3>
               <p>Complete vulnerability assessments in minutes, not hours</p>
             </div>
-            
+
             <div className="feature-card">
               <div className="feature-icon">🎯</div>
               <h3>Accurate Results</h3>
               <p>Professional-grade tools with minimal false positives</p>
             </div>
-            
+
             <div className="feature-card">
               <div className="feature-icon">📊</div>
               <h3>Detailed Reports</h3>
               <p>Comprehensive PDF reports with actionable insights</p>
             </div>
-            
+
             <div className="feature-card">
               <div className="feature-icon">🔐</div>
               <h3>Secure & Private</h3>
@@ -105,26 +110,29 @@ const Landing = () => {
               Cybersecurity made accessible for everyone
             </p>
           </div>
-          
+
           <div className="footer-links">
             <div className="footer-column">
               <h4>Product</h4>
               <a href="#features">Features</a>
               <a href="#tools">Tools</a>
             </div>
-          
-            
+
             <div className="footer-column">
               <h4>Connect</h4>
-              <a href="https://github.com/thehusnain" target="_blank" rel="noreferrer">GitHub</a>
-              <a href="https://twitter.com" target="_blank" rel="noreferrer">Twitter</a>
-              <a href="mailto:support@webshield.com">Support</a>
+              <a
+                href="https://github.com/thehusnain"
+                target="_blank"
+                rel="noreferrer"
+              >
+                GitHub
+              </a>
             </div>
           </div>
         </div>
-        
+
         <div className="footer-bottom">
-          <p>© 2026 WebShield..</p>
+          <p>© 2026 WebShield</p>
         </div>
       </footer>
     </div>
