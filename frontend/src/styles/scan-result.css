@@ -1,0 +1,82 @@
+.scan-container {
+  max-width: 960px;
+  margin: 40px auto;
+  padding: 0 16px;
+}
+.scan-card {
+  background: #0f172a;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+}
+.text-gradient {
+  background: linear-gradient(135deg, #00d4ff, #8a4fff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.scan-subtitle { color: #9fb3c8; margin-top: 6px; }
+.toast {
+  margin: 10px 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-weight: 600;
+}
+.toast-success { background: rgba(61, 213, 152, 0.18); color: #8ae48f; border: 1px solid rgba(61, 213, 152, 0.35); }
+.toast-error { background: rgba(255, 107, 107, 0.15); color: #ff9b9b; border: 1px solid rgba(255, 107, 107, 0.35); }
+
+.scan-error { display: flex; gap: 10px; align-items: center; background: rgba(255, 107, 107, 0.12); border: 1px solid rgba(255, 107, 107, 0.4); color: #ff9b9b; padding: 12px; border-radius: 10px; margin: 14px 0; }
+.error-icon { font-size: 1.2rem; }
+
+.result-card {
+  margin-top: 12px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 14px;
+  padding: 16px;
+}
+.result-header { display: flex; justify-content: space-between; align-items: center; }
+.result-header h3 { margin: 0; color: #e2e8f0; }
+.result-meta { color: #9fb3c8; margin-top: 4px; }
+.scan-status { padding: 6px 12px; border-radius: 12px; font-size: 0.9rem; text-transform: capitalize; color: #0b1020; }
+.status-completed { background: #8ae48f; }
+.status-running, .status-pending { background: #ffd166; }
+.status-failed, .status-cancelled, .status-canceled { background: #ff9b9b; }
+
+.result-body { margin-top: 14px; }
+.result-pre {
+  background: #0b1220;
+  color: #cbd5e1;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  max-height: 380px;
+  overflow: auto;
+  font-size: 0.9rem;
+}
+
+.result-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+.tool-button {
+  border: none;
+  border-radius: 10px;
+  padding: 10px 14px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  background: rgba(0, 212, 255, 0.12);
+  color: #00d4ff;
+}
+.tool-button:hover { transform: translateY(-1px); }
+
+.form-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+.btn-secondary, .scan-button {
+  border: none;
+  border-radius: 10px;
+  padding: 10px 16px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+.btn-secondary { background: rgba(255, 255, 255, 0.08); color: #e2e8f0; }
+.scan-button { background: linear-gradient(135deg, #0088ff, #00d4ff); color: white; box-shadow: 0 10px 25px rgba(0, 136, 255, 0.35); }
+.btn-secondary:hover, .scan-button:hover { transform: translateY(-1px); }
