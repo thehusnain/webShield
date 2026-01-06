@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { LoginUser } from "../../api/auth-api";
@@ -6,7 +7,7 @@ import "../../styles/auth.css";
 
 function Login() {
   const navigate = useNavigate();
-  const { checkAuth } = useAuth();
+  const { checkAuth, user } = useAuth();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -27,16 +28,29 @@ function Login() {
 
       if (response.data.success) {
         setFormError("Login successful");
+
+        // Try to read role from server response, fallback to auth context after checkAuth
+        const roleFromResponse = response.data.user?.role || response.data?.role || null;
+
+        // refresh auth context (checkAuth should load user into context)
         await checkAuth();
+
+        // final role: prefer response, otherwise read from context
+        const finalRole = roleFromResponse || user?.role;
+
         setTimeout(() => {
-          if (response.data.user?.agreedToTerms) {
-            navigate("/dashboard");
-          } else {
-            navigate("/disclaimer");
+          if (finalRole === "admin") {
+            navigate("/admin", { replace: true });
+            return;
           }
-        }, 800);
+
+          if (response.data.user?.agreedToTerms || user?.agreedToTerms) {
+            navigate("/dashboard", { replace: true });
+          } else {
+            navigate("/disclaimer", { replace: true });
+          }
+        }, 400);
       }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       const backendError = error?.response?.data?.error || "";
       if (

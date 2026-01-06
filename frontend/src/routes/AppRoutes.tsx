@@ -1,5 +1,8 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import AdminRoute from "../routes/AdminRoutes"
+import AdminDashboard from "../pages/admin/AdminDashboard";
+import AdminScans from "../pages/admin/AdminScan";
+import AdminUsers from "../pages/admin/AdminUser";
 import Landing from "../pages/public/Landing";
 import Login from "../pages/public/Login";
 import Signup from "../pages/public/Signup";
@@ -14,6 +17,7 @@ import ScanResult from "../pages/user/ScanResult";
 import ProtectedRoute from "../components/common/ProtectedRoute";
 import StartScan from "../pages/user/StartScan";
 import AboutTools from "../pages/user/AboutTools";
+
 function AppRoutes() {
   return (
     <BrowserRouter>
@@ -58,6 +62,7 @@ function AppRoutes() {
             </ProtectedRoute>
           }
         />
+
         <Route
           path="/disclaimer"
           element={
@@ -66,6 +71,8 @@ function AppRoutes() {
             </ProtectedRoute>
           }
         />
+
+        {/* User app routes (protected) */}
         <Route
           path="/dashboard"
           element={
@@ -82,38 +89,65 @@ function AppRoutes() {
             </ProtectedRoute>
           }
         />
-    <Route path="/dashboard" element={<Dashboard />} />
-    <Route path="/start-scan" element={<StartScan />} />
         <Route
-  path="/scan-progress/:scanId"
-  element={
-    <ProtectedRoute>
-      <ScanProgress />
-    </ProtectedRoute>
-  }
-/>
-<Route
-  path="/scan-result/:scanId"
-  element={
-    <ProtectedRoute>
-      <ScanResult />
-    </ProtectedRoute>
-  }
-/>
-<Route
-  path="/scan-history"
-  element={
-    <ProtectedRoute>
-      <ScanHistory />
-    </ProtectedRoute>
-  }
-/>
+          path="/start-scan"
+          element={
+            <ProtectedRoute>
+              <StartScan />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/scan-progress/:scanId"
+          element={
+            <ProtectedRoute>
+              <ScanProgress />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/scan-result/:scanId"
+          element={
+            <ProtectedRoute>
+              <ScanResult />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/scan-history"
+          element={
+            <ProtectedRoute>
+              <ScanHistory />
+            </ProtectedRoute>
+          }
+        />
 
-<Route path="/about-tools" element={<AboutTools />} />
+        <Route
+          path="/about-tools"
+          element={
+            <ProtectedRoute>
+              <AboutTools />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Admin protected route */}
+        <Route path="/admin" element={<AdminRoute />}>
+          <Route index element={<AdminDashboard />} />
+          <Route path="scans" element={<AdminScans />} />
+          <Route path="users" element={<AdminUsers />} />
+          {/* user history deep link handled by AdminUsers page */}
+          <Route path="users/:userId/history" element={<AdminUsers />} />
+        </Route>
+
+        {/* Redirect accidental /admin/stats browser visits to admin UI */}
+        <Route path="/admin/stats" element={<Navigate to="/admin" replace />} />
+
+        {/* fallback */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
   );
 }
-
 
 export default AppRoutes;
