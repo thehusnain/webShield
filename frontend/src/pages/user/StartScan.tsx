@@ -123,7 +123,6 @@ const StartScan = () => {
 
         {error && (
           <div className="scan-error">
-            <div className="error-icon">⚠️</div>
             <div className="error-text">{error}</div>
           </div>
         )}
@@ -135,7 +134,6 @@ const StartScan = () => {
               <span className="tooltip" data-tooltip="Enter the full URL of the website you want to scan"></span>
             </label>
             <div className="input-with-icon">
-              <span className="input-icon">🌐</span>
               <input
                 type="text"
                 placeholder="https://example.com"

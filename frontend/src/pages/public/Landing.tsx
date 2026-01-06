@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 import HeroSection from "../../components/landing/HeroSection";
 import ToolCards from "../../components/landing/ToolCards";
 import "../../styles/landing.css";
+import Lottie from "lottie-react";
+import shieldAnimation from "../../assets/icons/Shield.json";
 const Landing = () => {
   const [scrollY, setScrollY] = useState(0);
 
@@ -27,7 +29,13 @@ const Landing = () => {
       >
         <div className="nav-container">
           <div className="nav-logo">
-            <span className="logo-icon">🛡️</span>
+            <div className="logo-lottie-wrap hero-logo">
+              <Lottie
+                animationData={shieldAnimation}
+                loop
+                className="logo-lottie"
+              />
+            </div>
             <span className="logo-text">WebShield</span>
           </div>
 
@@ -61,25 +69,22 @@ const Landing = () => {
 
           <div className="features-grid">
             <div className="feature-card">
-              <div className="feature-icon">⚡</div>
+           
               <h3>Fast Scanning</h3>
               <p>Complete vulnerability assessments in minutes, not hours</p>
             </div>
 
             <div className="feature-card">
-              <div className="feature-icon">🎯</div>
               <h3>Accurate Results</h3>
               <p>Professional-grade tools with minimal false positives</p>
             </div>
 
             <div className="feature-card">
-              <div className="feature-icon">📊</div>
               <h3>Detailed Reports</h3>
               <p>Comprehensive PDF reports with actionable insights</p>
             </div>
 
             <div className="feature-card">
-              <div className="feature-icon">🔐</div>
               <h3>Secure & Private</h3>
               <p>Your scans and data are encrypted and confidential</p>
             </div>
@@ -93,17 +98,21 @@ const Landing = () => {
           <h2 className="cta-title">Ready to Secure Your Websites?</h2>
           <Link to="/signup" className="cta-button large">
             <span className="button-text">Start Free Trial</span>
-            <span className="button-sparkle">✨</span>
           </Link>
         </div>
       </section>
 
-      {/* Footer */}
       <footer className="landing-footer">
         <div className="footer-container">
           <div className="footer-brand">
             <div className="footer-logo">
-              <span className="logo-icon">🛡️</span>
+              <div className="footer-lottie-wrap">
+                <Lottie
+                  animationData={shieldAnimation}
+                  loop
+                  className="footer-lottie"
+                />
+              </div>
               <span className="logo-text">WebShield</span>
             </div>
             <p className="footer-tagline">

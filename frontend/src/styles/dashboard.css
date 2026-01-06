@@ -120,19 +120,25 @@
 }
 
 .logo-circle {
-  width: 60px;
-  height: 60px;
-  border-radius: 14px;
-  background: linear-gradient(135deg, #2962ff 0%, #42a5f5 100%);
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ffffff, #ffffff);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 800;
-  color: rgb(0, 0, 0);
-  font-size: 1.8rem;
-  box-shadow: 0 8px 24px rgba(41, 98, 255, 0.4);
-  position: relative;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+  padding: 8px;
   overflow: hidden;
+}
+
+.logo-animated {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  background: transparent;
+  border-radius: 50%;
 }
 
 .logo-circle::after {
@@ -305,20 +311,27 @@
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
 }
 
+/* Stat icon sizing (for Lottie, SVG, or images) */
 .stat-icon {
-  font-size: 2.5rem;
-  margin-bottom: 16px;
-  filter: drop-shadow(0 4px 12px rgba(255, 255, 255, 0.3));
+  width: 72px;
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+  filter: drop-shadow(0 4px 12px rgba(255, 255, 255, 0.25));
 }
 
-.stat-icon img {
-  width: 48px;
-  height: 48px;
-  object-fit:fill;
+.stat-lottie {
+  width: 72px;
+  height: 72px;
+  pointer-events: none;
 }
-.stat-icon img {
-  width : 48px;
-  height : 48px;
+
+.stat-icon img,
+.stat-icon svg {
+  width: 72px;
+  height: 72px;
   object-fit: contain;
 }
 
@@ -365,7 +378,7 @@
 .tools-grid.legacy-look {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 28px; /* slightly more breathing room */
+  gap: 28px;
   margin-bottom: 40px;
 }
 
@@ -458,7 +471,6 @@
   width: 100%;
 }
 
-
 /* ===================== DESCRIPTION ===================== */
 .tool-description.legacy {
   color: #ffffff;
@@ -519,7 +531,6 @@
     0 12px 28px rgba(41, 98, 255, 0.45);
   background: linear-gradient(135deg, #1a56db 0%, #2196f3 100%);
 }
-
 
 /* Recent scans */
 .recent-scans {
@@ -701,24 +712,44 @@
 .dashboard > *:not(.nav-strip) {
   animation: fadeIn 0.6s ease-out;
 }
-.logo-circle {
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;             
-  background: linear-gradient(135deg, #ffffff, #ffffff);
-  display: flex;
+
+/* ---------------------------------------------
+   Icon utility classes for future animated icons
+   --------------------------------------------- */
+
+/* General icon containers */
+.icon-64 { width: 64px; height: 64px; display: flex; align-items: center; justify-content: center; }
+.icon-72 { width: 72px; height: 72px; display: flex; align-items: center; justify-content: center; }
+
+/* Lottie helpers */
+.lottie-64 { width: 64px; height: 64px; pointer-events: none; }
+.lottie-72 { width: 72px; height: 72px; pointer-events: none; }
+
+/* Image/SVG helpers */
+.icon-img-64, .icon-svg-64 { width: 64px; height: 64px; object-fit: contain; }
+.icon-img-72, .icon-svg-72 { width: 72px; height: 72px; object-fit: contain; }
+
+/* Optional glow */
+.icon-glow { filter: drop-shadow(0 4px 12px rgba(255, 255, 255, 0.25)); }
+
+/* Shared pill layout */
+.pill-icon {
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
-  padding: 8px;                    
-  overflow: hidden;
+  gap: 8px;
+  padding: 10px 16px;
 }
 
-.logo-animated {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;              /* keep whole image visible */
-  display: block;
-  background: transparent;
-  border-radius: 50%;               /* round the inner image too */
+/* Lottie sizes (separate classes but same sizing) */
+.profile-pill-lottie,
+.logout-pill-lottie {
+  width: 20px;   /* adjust to 20–24px as you like */
+  height: 20px;
+  flex-shrink: 0;
+  pointer-events: none;
+}
+
+/* Optional: text alignment */
+.pill-icon span {
+  line-height: 1;
 }

@@ -35,11 +35,21 @@ export default function AdminDashboard() {
           throw new Error(data?.error || `Unexpected response (${res.status})`);
         }
 
-        setTotalUsers(typeof data.totalUsers === "number" ? data.totalUsers : null);
-        setTotalScans(typeof data.totalScans === "number" ? data.totalScans : null);
-        setActiveScans(typeof data.activeScans === "number" ? data.activeScans : null);
-        setRecentUsers(Array.isArray(data.recentUsers) ? data.recentUsers.slice(0, 8) : []);
-        setRecentScans(Array.isArray(data.recentScans) ? data.recentScans.slice(0, 12) : []);
+        setTotalUsers(
+          typeof data.totalUsers === "number" ? data.totalUsers : null
+        );
+        setTotalScans(
+          typeof data.totalScans === "number" ? data.totalScans : null
+        );
+        setActiveScans(
+          typeof data.activeScans === "number" ? data.activeScans : null
+        );
+        setRecentUsers(
+          Array.isArray(data.recentUsers) ? data.recentUsers.slice(0, 8) : []
+        );
+        setRecentScans(
+          Array.isArray(data.recentScans) ? data.recentScans.slice(0, 12) : []
+        );
       } catch (err: any) {
         console.error("Admin stats error:", err);
         const serverMsg = err?.response?.data?.error || err?.message;
@@ -52,7 +62,8 @@ export default function AdminDashboard() {
     load();
   }, []);
 
-  const formatDate = (iso?: string) => (iso ? new Date(iso).toLocaleString() : "");
+  const formatDate = (iso?: string) =>
+    iso ? new Date(iso).toLocaleString() : "";
 
   return (
     <div className="admin-simple">
@@ -62,8 +73,12 @@ export default function AdminDashboard() {
 
         {/* Admin action links */}
         <div style={{ marginTop: 12, display: "flex", gap: 10 }}>
-          <Link to="/admin/scans" className="admin-action-btn">Manage Scans</Link>
-          <Link to="/admin/users" className="admin-action-btn">Manage Users</Link>
+          <Link to="/admin/scans" className="admin-action-btn">
+            Manage Scans
+          </Link>
+          <Link to="/admin/users" className="admin-action-btn">
+            Manage Users
+          </Link>
         </div>
       </div>
 
@@ -125,11 +140,18 @@ export default function AdminDashboard() {
                         >
                           {s.targetUrl ?? "Unknown"}
                         </a>
-                        <span className="item-meta"> — {s.scanType ?? "—"}</span>
+                        <span className="item-meta">
+                          {" "}
+                          — {s.scanType ?? "—"}
+                        </span>
                       </div>
                       <div className="item-extra">
-                        <span className={`scan-status ${s.status || ""}`}>{s.status ?? "—"}</span>
-                        <div className="item-time">{formatDate(s.createdAt)}</div>
+                        <span className={`scan-status ${s.status || ""}`}>
+                          {s.status ?? "—"}
+                        </span>
+                        <div className="item-time">
+                          {formatDate(s.createdAt)}
+                        </div>
                       </div>
                     </li>
                   ))}

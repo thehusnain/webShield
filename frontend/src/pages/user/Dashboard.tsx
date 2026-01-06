@@ -1,10 +1,19 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { getScanHistory } from "../../api/scan-api";
 import "../../styles/dashboard.css";
-
+import Lottie from "lottie-react";
+import successAnimation from "../../assets/icons/Success.json";
+import pendingAnimation from "../../assets/icons/pending.json"
+import foundAimation from "../../assets/icons/found.json"
+import startAnimation from "../../assets/icons/start.json"
+import historyAnimation from "../../assets/icons/history.json"
+import infoAnimation from "../../assets/icons/info.json"
+import profileAnimation from "../../assets/icons/profile.json"
+import logoutAnimation from "../../assets/icons/logout.json"
 interface Scan {
   _id: string;
   targetUrl?: string;
@@ -19,25 +28,42 @@ interface Scan {
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { logout, user, loading, authChecked } = useAuth(); // Added user, loading, authChecked
   const [scans, setScans] = useState<Scan[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [dashboardLoading, setDashboardLoading] = useState(true);
   const [error, setError] = useState("");
 
+  // Prevent rendering until auth is fully checked
+  if (loading || !authChecked) {
+    return null;
+  }
+
+  // If user hasn't accepted terms, redirect immediately
+  if (user && !user.agreedToTerms) {
+    navigate("/disclaimer", { replace: true });
+    return null;
+  }
+
+  // Only load scans after we know user is authenticated and accepted terms
   useEffect(() => {
-    const load = async () => {
-      try {
-        const res = await getScanHistory();
-        const arr = res.data?.scans || res.data?.history || [];
-        setScans(Array.isArray(arr) ? arr : []);
-      } catch (e: any) {
-        setError(e?.response?.data?.error || "Failed to load stats");
-      } finally {
-        setLoading(false);
-      }
-    };
-    load();
-  }, []);
+    if (user?.agreedToTerms) {
+      const load = async () => {
+        try {
+          const res = await getScanHistory();
+          const arr = res.data?.scans || res.data?.history || [];
+          setScans(Array.isArray(arr) ? arr : []);
+        } catch (e: any) {
+          setError(e?.response?.data?.error || "Failed to load stats");
+        } finally {
+          setDashboardLoading(false);
+        }
+      };
+      load();
+    }
+  }, [user]);
+
+  // Check user role
+  const isAdmin = user?.role === 'admin';
 
   const metrics = useMemo(() => {
     const total = scans.length;
@@ -77,6 +103,19 @@ const Dashboard = () => {
         <div className="nav-right">
           <button onClick={() => navigate("/start-scan")}>Start Scan</button>
           <button onClick={() => navigate("/about-tools")}>Tools Info</button>
+          {/* Admin Dashboard Button - Only show for admin users */}
+          {isAdmin && (
+            <button 
+              onClick={() => navigate("/admin-dashboard")}
+              style={{
+                backgroundColor: "#ff6b6b",
+                color: "white",
+                border: "none"
+              }}
+            >
+              ⚙️ Admin Dashboard
+            </button>
+          )}
         </div>
       </div>
 
@@ -88,20 +127,29 @@ const Dashboard = () => {
 
           <div>
             <h2 className="text-color">WebShield Dashboard</h2>
-            <p className="welcome-text">Ready to secure some websites?</p>
+            <p className="welcome-text">
+              Welcome back, {user?.username || user?.email || "User"}!
+              {isAdmin && " (Administrator)"}
+            </p>
           </div>
         </div>
-        <div className="top-right">
-          <button
-            className="pill-btn ghost"
-            onClick={() => navigate("/profile")}
-          >
-            👤 Profile
-          </button>
-          <button className="pill-btn danger" onClick={handleLogout}>
-            🔓 Logout
-          </button>
-        </div>
+       
+<div className="top-right">
+  <button
+    className="pill-btn ghost pill-icon"
+    onClick={() => navigate("/profile")}
+  >
+    <Lottie animationData={profileAnimation} loop className="profile-pill-lottie" />
+    <span>Profile</span>
+  </button>
+  <button
+    className="pill-btn danger pill-icon"
+    onClick={handleLogout}
+  >
+    <Lottie animationData={logoutAnimation} loop className="logout-pill-lottie" />
+    <span>Logout</span>
+  </button>
+</div>
       </div>
 
       {error && (
@@ -112,7 +160,9 @@ const Dashboard = () => {
 
       <div className="quick-row">
         <button className="quick-card" onClick={() => navigate("/start-scan")}>
-          <div className="quick-icon">🚀</div>
+             <div className="stat-icon">
+    <Lottie animationData={startAnimation} loop className="stat-lottie" />
+  </div>
           <div className="quick-text">
             <div className="quick-title">Start Scan</div>
             <div className="quick-sub">Launch a new security scan</div>
@@ -122,14 +172,18 @@ const Dashboard = () => {
           className="quick-card"
           onClick={() => navigate("/scan-history")}
         >
-          <div className="quick-icon">📋</div>
+         <div className="stat-icon">
+    <Lottie animationData={historyAnimation} loop className="stat-lottie" />
+  </div>
           <div className="quick-text">
             <div className="quick-title">Scan History</div>
             <div className="quick-sub">Review past scans</div>
           </div>
         </button>
         <button className="quick-card" onClick={() => navigate("/about-tools")}>
-          <div className="quick-icon">ℹ️</div>
+         <div className="stat-icon">
+    <Lottie animationData={infoAnimation} loop className="stat-lottie" />
+  </div>
           <div className="quick-text">
             <div className="quick-title">Learn Tools</div>
             <div className="quick-sub">Know what each tool does</div>
@@ -138,20 +192,26 @@ const Dashboard = () => {
       </div>
 
       <div className="stats-grid">
+             <div className="stat-card">
+  <div className="stat-icon">
+    <Lottie animationData={successAnimation} loop className="stat-lottie" />
+  </div>
+  <div className="stat-value">{dashboardLoading ? "…" : metrics.completed}</div>
+  <div className="stat-label">Scans Completed</div>
+</div>
         <div className="stat-card">
-          <div className="stat-icon">✅</div>
-          <div className="stat-value">{loading ? "…" : metrics.completed}</div>
-          <div className="stat-label">Scans Completed</div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-icon">⏳</div>
-          <div className="stat-value">{loading ? "…" : metrics.pending}</div>
+           <div className="stat-icon">
+    <Lottie animationData={pendingAnimation} loop className="stat-lottie" />
+  </div>
+          <div className="stat-value">{dashboardLoading ? "…" : metrics.pending}</div>
           <div className="stat-label">Pending / Running</div>
         </div>
         <div className="stat-card">
-          <div className="stat-icon">🎯</div>
+          <div className="stat-icon">
+    <Lottie animationData={foundAimation} loop className="stat-lottie" />
+  </div>
           <div className="stat-value">
-            {loading ? "…" : metrics.vulnerabilities}
+            {dashboardLoading ? "…" : metrics.vulnerabilities}
           </div>
           <div className="stat-label">Vulnerabilities Found</div>
         </div>
@@ -191,7 +251,7 @@ const Dashboard = () => {
 
       <div className="recent-scans">
         <h3>Recent Scans</h3>
-        {recent.length === 0 && <p className="muted">No scans yet.</p>}
+        {recent.length === 0 && !dashboardLoading && <p className="muted">No scans yet.</p>}
         {recent.map((s) => (
           <div className="scan-item" key={s._id}>
             <div>

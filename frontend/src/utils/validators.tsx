@@ -1,31 +1,46 @@
-export const validateUsername = (username: string): { isValid: boolean; message: string } => {
+export const validateUsername = (
+  username: string
+): { isValid: boolean; message: string } => {
   if (username.length < 3) {
-    return { isValid: false, message: "Username must be at least 3 characters" };
+    return {
+      isValid: false,
+      message: "Username must be at least 3 characters",
+    };
   }
   if (username.length > 20) {
-    return { isValid: false, message: "Username must be less than 20 characters" };
+    return {
+      isValid: false,
+      message: "Username must be less than 20 characters",
+    };
   }
   if (!/^[a-zA-Z0-9_]+$/.test(username)) {
-    return { isValid: false, message: "Username can only contain letters, numbers, and underscores" };
+    return {
+      isValid: false,
+      message: "Username can only contain letters, numbers, and underscores",
+    };
   }
   return { isValid: true, message: "" };
 };
 
-export const validateEmail = (email: string): { isValid: boolean; message: string } => {
+export const validateEmail = (
+  email: string
+): { isValid: boolean; message: string } => {
   if (!email) {
     return { isValid: false, message: "Email is required" };
   }
-  
+
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(email)) {
     return { isValid: false, message: "Please enter a valid email address" };
   }
-  
+
   return { isValid: true, message: "" };
 };
 
-export const validatePassword = (password: string): { 
-  isValid: boolean; 
+export const validatePassword = (
+  password: string
+): {
+  isValid: boolean;
   message: string;
   details: {
     length: boolean;
@@ -33,7 +48,7 @@ export const validatePassword = (password: string): {
     lowercase: boolean;
     number: boolean;
     special: boolean;
-  }
+  };
 } => {
   const checks = {
     length: password.length >= 8,
@@ -55,15 +70,17 @@ export const validatePassword = (password: string): {
   } else if (!checks.special) {
     message = "Password must contain at least 1 special character (!@#$%^&*)";
   }
-  
-  const isValid = Object.values(checks).every(check => check);
-  
+
+  const isValid = Object.values(checks).every((check) => check);
+
   return {
     isValid,
     message,
-    details: checks
+    details: checks,
   };
 };
-export const isValidUsername = (username: string) => validateUsername(username).isValid;
+export const isValidUsername = (username: string) =>
+  validateUsername(username).isValid;
 export const isValidEmail = (email: string) => validateEmail(email).isValid;
-export const isStrongPassword = (password: string) => validatePassword(password).isValid;
+export const isStrongPassword = (password: string) =>
+  validatePassword(password).isValid;

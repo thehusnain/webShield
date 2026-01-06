@@ -18,7 +18,10 @@ const ForgotPassword = () => {
     try {
       setLoading(true);
       const res = await forgotPassword(email.trim());
-      setMessage(res.data?.message || "If the email exists, reset instructions were sent.");
+      setMessage(
+        res.data?.message ||
+          "If the email exists, reset instructions were sent."
+      );
     } catch (err: any) {
       const backendError = err?.response?.data?.error;
       setMessage(backendError || "Failed to send reset email. Try again.");
@@ -32,7 +35,13 @@ const ForgotPassword = () => {
       <form className="auth-card" onSubmit={handleSubmit}>
         <h2>Forgot Password</h2>
         {message && (
-          <div className={`message ${message.toLowerCase().includes("fail") ? "error-message" : "success-message"}`}>
+          <div
+            className={`message ${
+              message.toLowerCase().includes("fail")
+                ? "error-message"
+                : "success-message"
+            }`}
+          >
             {message}
           </div>
         )}

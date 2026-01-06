@@ -9,7 +9,8 @@ const toolData = [
     badges: ["Ports", "Services", "Network"],
     description:
       "Scans a website or server to find which network ports are open and what services run on them. Good to see what is exposed to the internet.",
-    whenToUse: "When you want to see which services are reachable from the internet."
+    whenToUse:
+      "When you want to see which services are reachable from the internet.",
   },
   {
     id: "nikto",
@@ -18,7 +19,8 @@ const toolData = [
     badges: ["Web", "Config", "Files"],
     description:
       "Checks a web server for outdated software, common misconfigurations, and dangerous files. Fast way to find basic web issues.",
-    whenToUse: "When you want a quick baseline check of a website (not deep tests)."
+    whenToUse:
+      "When you want a quick baseline check of a website (not deep tests).",
   },
   {
     id: "sqlmap",
@@ -27,7 +29,8 @@ const toolData = [
     badges: ["Database", "SQLi", "Automated"],
     description:
       "Looks for SQL injection weaknesses that allow attackers to read or change data. Only use on sites you own or have permission to test.",
-    whenToUse: "When you suspect user input may change or read the database (only with permission)."
+    whenToUse:
+      "When you suspect user input may change or read the database (only with permission).",
   },
   {
     id: "sslscan",
@@ -36,7 +39,8 @@ const toolData = [
     badges: ["TLS", "Ciphers", "Protocols"],
     description:
       "Tests the website's TLS/SSL settings to show supported versions and weak ciphers. Helps confirm secure encryption is used.",
-    whenToUse: "When you want to verify a site uses up-to-date TLS and safe ciphers."
+    whenToUse:
+      "When you want to verify a site uses up-to-date TLS and safe ciphers.",
   },
 ];
 

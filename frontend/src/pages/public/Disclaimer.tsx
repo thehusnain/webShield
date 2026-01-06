@@ -1,4 +1,5 @@
-import { useState } from "react";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { acceptTerms } from "../../api/auth-api";
@@ -6,12 +7,38 @@ import "../../styles/disclaimer.css";
 
 const Disclaimer = () => {
   const navigate = useNavigate();
-  const { checkAuth } = useAuth();
+  const { checkAuth, logout, user, loading, authChecked } = useAuth();
 
   const [checked, setChecked] = useState(false);
   const [error, setError] = useState("");
   const [checkboxError, setCheckboxError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+
+  // Prevent rendering until auth is fully checked
+  useEffect(() => {
+    if (authChecked && !loading && user) {
+      // If user has already accepted terms, redirect immediately
+      if (user.agreedToTerms) {
+        navigate("/dashboard", { replace: true });
+      }
+    }
+  }, [authChecked, loading, user, navigate]);
+
+  // Don't show anything while checking
+  if (loading || !authChecked) {
+    return null;
+  }
+
+  // If user doesn't exist (shouldn't happen with ProtectedRoute, but just in case)
+  if (!user) {
+    navigate("/login", { replace: true });
+    return null;
+  }
+
+  // If user has accepted terms (double check - in case useEffect hasn't run yet)
+  if (user.agreedToTerms) {
+    return null;
+  }
 
   const handleAgree = async () => {
     setError("");
@@ -25,24 +52,28 @@ const Disclaimer = () => {
     try {
       setIsLoading(true);
       const response = await acceptTerms();
+
       if (response.data.success) {
-        setError("Terms accepted! ");
+        // Update auth state and redirect immediately
         await checkAuth();
-        setTimeout(() => navigate("/dashboard", { replace: true }), 600);
+        navigate("/dashboard", { replace: true });
       } else {
         setError(
           response.data.error || "Failed to accept terms. Please try again."
         );
+        setIsLoading(false);
       }
-    } catch (e) {
-      setError("Network error. Please try again.");
+    } catch (e: any) {
+      setError(e.response?.data?.error || "Network error. Please try again.");
       console.error("Error accepting terms:", e);
-    } finally {
       setIsLoading(false);
     }
   };
 
-  const handleDisagree = () => navigate("/", { replace: true });
+  const handleDisagree = async () => {
+    await logout();
+    navigate("/", { replace: true });
+  };
 
   return (
     <div className="disclaimer-container">
@@ -54,13 +85,7 @@ const Disclaimer = () => {
         </div>
 
         {error && (
-          <div
-            className={`disclaimer-message ${
-              error.includes("✅") ? "disclaimer-success" : "disclaimer-error"
-            }`}
-          >
-            {error}
-          </div>
+          <div className="disclaimer-message disclaimer-error">{error}</div>
         )}
 
         <div className="disclaimer-content">

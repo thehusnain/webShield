@@ -13,7 +13,7 @@ interface User {
   userId: string;
   username: string;
   email: string;
-  role: string;
+  role: "user" | "admin";
   scanLimit: number;
   usedScan: number;
   agreedToTerms: boolean;
@@ -23,10 +23,11 @@ interface User {
 interface AuthContextType {
   user: User | null;
   loading: boolean;
+  authChecked: boolean;
   login: (userData: User) => void;
   logout: () => Promise<void>;
   checkAuth: () => Promise<void>;
-  refreshUser: () => Promise<void>; // alias of checkAuth
+  refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -46,6 +47,7 @@ interface AuthProviderProps {
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [authChecked, setAuthChecked] = useState(false);
 
   const login = (userData: User) => {
     setUser(userData);
@@ -53,7 +55,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const logout = async () => {
     try {
-      await LogoutUser(); // clear cookie on server
+      await LogoutUser();
     } catch (error) {
       console.error("Logout error:", error);
     } finally {
@@ -65,28 +67,47 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const checkAuth = async () => {
     try {
-      setLoading(true);
       const response = await getProfile();
       if (response.data.success) {
         setUser(response.data.user);
+        return response.data.user;
       } else {
         setUser(null);
+        return null;
       }
     } catch (error) {
       console.error("Auth check failed:", error);
       setUser(null);
-    } finally {
-      setLoading(false);
+      return null;
     }
   };
 
   useEffect(() => {
-    checkAuth();
-  }, []);
+    const initializeAuth = async () => {
+      setLoading(true);
+      try {
+        await checkAuth();
+      } finally {
+        setTimeout(() => {
+          setAuthChecked(true);
+          setLoading(false);
+        }, 0);
+      }
+    };
 
+    initializeAuth();
+  }, []);
   return (
     <AuthContext.Provider
-      value={{ user, loading, login, logout, checkAuth, refreshUser: checkAuth }}
+      value={{
+        user,
+        loading,
+        authChecked,
+        login,
+        logout,
+        checkAuth,
+        refreshUser: checkAuth,
+      }}
     >
       {children}
     </AuthContext.Provider>

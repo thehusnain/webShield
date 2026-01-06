@@ -29,13 +29,10 @@ function Login() {
       if (response.data.success) {
         setFormError("Login successful");
 
-        // Try to read role from server response, fallback to auth context after checkAuth
-        const roleFromResponse = response.data.user?.role || response.data?.role || null;
+        const roleFromResponse =
+          response.data.user?.role || response.data?.role || null;
 
-        // refresh auth context (checkAuth should load user into context)
         await checkAuth();
-
-        // final role: prefer response, otherwise read from context
         const finalRole = roleFromResponse || user?.role;
 
         setTimeout(() => {
@@ -87,7 +84,8 @@ function Login() {
         {formError && (
           <div
             className={`message ${
-              formError.includes("✅") || formError.toLowerCase().includes("success")
+              formError.includes("✅") ||
+              formError.toLowerCase().includes("success")
                 ? "success-message"
                 : "error-message"
             }`}

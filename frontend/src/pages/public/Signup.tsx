@@ -1,8 +1,11 @@
-// pages/public/Signup.tsx - ENHANCED VERSION
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { signupUser } from "../../api/auth-api.ts";
-import { validateUsername, validateEmail, validatePassword } from "../../utils/validators";
+import {
+  validateUsername,
+  validateEmail,
+  validatePassword,
+} from "../../utils/validators";
 import "../../styles/auth.css";
 
 function Signup() {
@@ -14,21 +17,21 @@ function Signup() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  
+
   // Error states for each field
   const [usernameError, setUsernameError] = useState("");
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [confirmPasswordError, setConfirmPasswordError] = useState("");
   const [formError, setFormError] = useState("");
-  
+
   // Password strength details
   const [passwordDetails, setPasswordDetails] = useState({
     length: false,
     uppercase: false,
     lowercase: false,
     number: false,
-    special: false
+    special: false,
   });
 
   // Real-time validation effects
@@ -62,7 +65,7 @@ function Signup() {
         uppercase: false,
         lowercase: false,
         number: false,
-        special: false
+        special: false,
       });
     }
   }, [password]);
@@ -87,22 +90,22 @@ function Signup() {
     const usernameValidation = validateUsername(username);
     const emailValidation = validateEmail(email);
     const passwordValidation = validatePassword(password);
-    
+
     if (!usernameValidation.isValid) {
       setUsernameError(usernameValidation.message);
       return;
     }
-    
+
     if (!emailValidation.isValid) {
       setEmailError(emailValidation.message);
       return;
     }
-    
+
     if (!passwordValidation.isValid) {
       setPasswordError(passwordValidation.message);
       return;
     }
-    
+
     if (password !== confirmPassword) {
       setConfirmPasswordError("Passwords do not match");
       return;
@@ -122,13 +125,19 @@ function Signup() {
         setFormError("Account created successfully.");
         setTimeout(() => navigate("/login"), 2000);
       }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       const backendError = error?.response?.data?.error || "";
-      
-      if (backendError.includes("username") || backendError.includes("Username")) {
+
+      if (
+        backendError.includes("username") ||
+        backendError.includes("Username")
+      ) {
         setUsernameError("Username already exists. Please choose another.");
-      } else if (backendError.includes("email") || backendError.includes("Email")) {
+      } else if (
+        backendError.includes("email") ||
+        backendError.includes("Email")
+      ) {
         setEmailError("Email already registered. Please login instead.");
       } else {
         setFormError(backendError || "Signup failed. Please try again.");
@@ -145,7 +154,11 @@ function Signup() {
 
         {/* Form-level error */}
         {formError && (
-          <div className={`message ${formError.includes("✅") ? "success-message" : "error-message"}`}>
+          <div
+            className={`message ${
+              formError.includes("✅") ? "success-message" : "error-message"
+            }`}
+          >
             {formError}
           </div>
         )}
@@ -184,26 +197,36 @@ function Signup() {
             className={passwordError ? "input-error" : ""}
           />
           {passwordError && <div className="field-error">{passwordError}</div>}
-          
+
           {/* Password strength indicator */}
           {password && (
             <div className="password-strength">
               <div className="strength-bar">
-                <div className={`strength-fill ${
-                  Object.values(passwordDetails).filter(Boolean).length >= 4 ? "strong" :
-                  Object.values(passwordDetails).filter(Boolean).length >= 2 ? "medium" : "weak"
-                }`}></div>
+                <div
+                  className={`strength-fill ${
+                    Object.values(passwordDetails).filter(Boolean).length >= 4
+                      ? "strong"
+                      : Object.values(passwordDetails).filter(Boolean).length >=
+                        2
+                      ? "medium"
+                      : "weak"
+                  }`}
+                ></div>
               </div>
-              
+
               <div className="password-rules">
                 <ul>
                   <li className={passwordDetails.length ? "valid" : "invalid"}>
                     {passwordDetails.length ? "✓" : "✗"} At least 8 characters
                   </li>
-                  <li className={passwordDetails.uppercase ? "valid" : "invalid"}>
+                  <li
+                    className={passwordDetails.uppercase ? "valid" : "invalid"}
+                  >
                     {passwordDetails.uppercase ? "✓" : "✗"} 1 uppercase letter
                   </li>
-                  <li className={passwordDetails.lowercase ? "valid" : "invalid"}>
+                  <li
+                    className={passwordDetails.lowercase ? "valid" : "invalid"}
+                  >
                     {passwordDetails.lowercase ? "✓" : "✗"} 1 lowercase letter
                   </li>
                   <li className={passwordDetails.number ? "valid" : "invalid"}>
@@ -227,7 +250,9 @@ function Signup() {
             onChange={(e) => setConfirmPassword(e.target.value)}
             className={confirmPasswordError ? "input-error" : ""}
           />
-          {confirmPasswordError && <div className="field-error">{confirmPasswordError}</div>}
+          {confirmPasswordError && (
+            <div className="field-error">{confirmPasswordError}</div>
+          )}
         </div>
 
         <button type="submit" disabled={loading}>

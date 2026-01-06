@@ -1,10 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
-import {
-  adminGetAllScans,
-  adminDeleteScan,
-} from "../../api/admin-api";
-import "../../styles/admin-dashboard.css"; // reuse styles
+import { adminGetAllScans, adminDeleteScan } from "../../api/admin-api";
+import "../../styles/admin-dashboard.css";
 
 type Scan = {
   _id: string;
@@ -34,7 +31,9 @@ export default function AdminScans() {
         setScans(Array.isArray(data.scans) ? data.scans : []);
       } catch (err: any) {
         console.error("Load scans error:", err);
-        setError(err?.response?.data?.error || err?.message || "Failed to load scans");
+        setError(
+          err?.response?.data?.error || err?.message || "Failed to load scans"
+        );
       } finally {
         setLoading(false);
       }
@@ -43,7 +42,9 @@ export default function AdminScans() {
   }, []);
 
   const handleDelete = async (id: string) => {
-    const ok = window.confirm("Delete this scan? This action cannot be undone.");
+    const ok = window.confirm(
+      "Delete this scan? This action cannot be undone."
+    );
     if (!ok) return;
     try {
       setDeleting(id);
@@ -51,19 +52,24 @@ export default function AdminScans() {
       setScans((s) => s.filter((x) => x._id !== id));
     } catch (err: any) {
       console.error("Delete scan error:", err);
-      alert(err?.response?.data?.error || err?.message || "Failed to delete scan");
+      alert(
+        err?.response?.data?.error || err?.message || "Failed to delete scan"
+      );
     } finally {
       setDeleting(null);
     }
   };
 
-  const formatDate = (iso?: string) => (iso ? new Date(iso).toLocaleString() : "");
+  const formatDate = (iso?: string) =>
+    iso ? new Date(iso).toLocaleString() : "";
 
   return (
     <div className="admin-simple" style={{ paddingTop: 8 }}>
       <div className="admin-simple-header">
         <h1>All Scans</h1>
-        <p className="muted">All recorded scans (admin view). You can delete a scan from here.</p>
+        <p className="muted">
+          All recorded scans (admin view). You can delete a scan from here.
+        </p>
       </div>
 
       {loading ? (
@@ -76,13 +82,27 @@ export default function AdminScans() {
         <div className="list-card" style={{ padding: 8 }}>
           <ul className="list-items">
             {scans.map((s) => (
-              <li key={s._id} className="list-item" style={{ alignItems: "center" }}>
+              <li
+                key={s._id}
+                className="list-item"
+                style={{ alignItems: "center" }}
+              >
                 <div style={{ flex: 1 }}>
                   <div className="item-main">
-                    <a className="item-title link" href={s.targetUrl || "#"} target="_blank" rel="noreferrer">{s.targetUrl || "Unknown"}</a>
+                    <a
+                      className="item-title link"
+                      href={s.targetUrl || "#"}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      {s.targetUrl || "Unknown"}
+                    </a>
                     <span className="item-meta"> — {s.scanType ?? "—"} </span>
                   </div>
-                  <div className="item-meta">{formatDate(s.createdAt)} — by {s.userId?.username ?? s.userId ?? "unknown"}</div>
+                  <div className="item-meta">
+                    {formatDate(s.createdAt)} — by{" "}
+                    {s.userId?.username ?? s.userId ?? "unknown"}
+                  </div>
                 </div>
 
                 <div style={{ display: "flex", gap: 8, alignItems: "center" }}>

@@ -29,7 +29,9 @@ const ResultCard: React.FC<Props> = ({
       </div>
       <p>Tool: {tool}</p>
       <p>Started: {startedAt ? new Date(startedAt).toLocaleString() : "N/A"}</p>
-      <p>Finished: {finishedAt ? new Date(finishedAt).toLocaleString() : "N/A"}</p>
+      <p>
+        Finished: {finishedAt ? new Date(finishedAt).toLocaleString() : "N/A"}
+      </p>
       <div className="result-actions">
         {onGenerateReport && (
           <button className="tool-button" onClick={onGenerateReport}>

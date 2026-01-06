@@ -33,7 +33,7 @@ const ScanProgress = () => {
       "Tip: SQLMap automates SQLi detection; start with low risk levels.",
       "Tip: SSLScan checks weak ciphers and protocol support.",
       "Reminder: Only scan hosts you own or have permission to test.",
-      "Best practice: Re-run scans after patching to validate fixes."
+      "Best practice: Re-run scans after patching to validate fixes.",
     ];
     return tips[Math.floor(Math.random() * tips.length)];
   }, [status]);
@@ -94,9 +94,7 @@ const ScanProgress = () => {
             <h2 className="text-gradient">Scan Progress</h2>
             <p className="scanp-subtitle">Scan ID: {scanId}</p>
           </div>
-          <div className={`chip chip-${status}`}>
-            {statusLabel}
-          </div>
+          <div className={`chip chip-${status}`}>{statusLabel}</div>
         </div>
 
         <div className="scanp-meta">
@@ -118,7 +116,6 @@ const ScanProgress = () => {
 
         {error && (
           <div className="scanp-error">
-            <div className="error-icon">⚠️</div>
             <div className="error-text">{error}</div>
           </div>
         )}
@@ -126,7 +123,9 @@ const ScanProgress = () => {
         <div className="progress-wrap">
           <div className="progress-top">
             <span>{statusLabel}</span>
-            <span className="percent">{Math.min(100, Math.max(0, percent))}%</span>
+            <span className="percent">
+              {Math.min(100, Math.max(0, percent))}%
+            </span>
           </div>
           <div className="progress-bar-outer">
             <div
@@ -138,13 +137,18 @@ const ScanProgress = () => {
         </div>
 
         <div className="scanp-footer">
-          <button className="btn-secondary" onClick={() => navigate("/dashboard")}>
+          <button
+            className="btn-secondary"
+            onClick={() => navigate("/dashboard")}
+          >
             ← Back to Dashboard
           </button>
           <button
             className="btn-cancel"
             onClick={handleCancel}
-            disabled={["completed", "canceled", "cancelled", "failed"].includes(status)}
+            disabled={["completed", "canceled", "cancelled", "failed"].includes(
+              status
+            )}
           >
             Cancel Scan
           </button>

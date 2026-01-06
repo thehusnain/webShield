@@ -17,7 +17,7 @@ const ScanHistory = () => {
         setScans(Array.isArray(arr) ? arr : []);
       } catch (e: any) {
         setError(e?.response?.data?.error || "Failed to load scan history");
-        setScans([]); 
+        setScans([]);
       }
     };
     load();
@@ -29,7 +29,6 @@ const ScanHistory = () => {
         <h2 className="text-gradient">Scan History</h2>
         {error && (
           <div className="scan-error">
-            <div className="error-icon">⚠️</div>
             <div className="error-text">{error}</div>
           </div>
         )}
@@ -41,13 +40,23 @@ const ScanHistory = () => {
               <div key={s._id || crypto.randomUUID()} className="scan-item">
                 <div>
                   <strong>{s.targetUrl ?? s.url ?? "Unknown target"}</strong>
-                  <p style={{ color: "#88ccff", fontSize: "0.9rem", marginTop: "5px" }}>
+                  <p
+                    style={{
+                      color: "#88ccff",
+                      fontSize: "0.9rem",
+                      marginTop: "5px",
+                    }}
+                  >
                     {(s.scanType ?? s.tool ?? "unknown").toUpperCase()} •{" "}
-                    {s.createdAt ? new Date(s.createdAt).toLocaleString() : "N/A"}
+                    {s.createdAt
+                      ? new Date(s.createdAt).toLocaleString()
+                      : "N/A"}
                   </p>
                 </div>
                 <div className="scan-status-row">
-                  <span className={`scan-status status-${s.status}`}>{s.status}</span>
+                  <span className={`scan-status status-${s.status}`}>
+                    {s.status}
+                  </span>
                   {s.status === "running" || s.status === "pending" ? (
                     <button
                       className="tool-button"
@@ -69,7 +78,10 @@ const ScanHistory = () => {
         </div>
 
         <div className="form-actions">
-          <button className="btn-secondary" onClick={() => navigate("/dashboard")}>
+          <button
+            className="btn-secondary"
+            onClick={() => navigate("/dashboard")}
+          >
             ← Back to Dashboard
           </button>
         </div>
