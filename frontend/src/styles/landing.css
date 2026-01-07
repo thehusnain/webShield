@@ -34,18 +34,19 @@
 .nav-logo {
   display: inline-flex;
   align-items: center;
-  gap: 12px;
+  gap: 0px;  /* increased from 12px */
   font-size: 1.5rem;
   font-weight: 700;
   text-decoration: none;
   color: #00d4ff;
   transition: transform 0.3s ease;
 }
+
 .nav-logo:hover { transform: scale(1.05); }
 
 .logo-lottie-wrap {
-  width: 56px;   /* bigger animated icon */
-  height: 56px;
+  width: 72px;   /* increased from 56px */
+  height: 72px;  /* increased from 56px */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -239,8 +240,13 @@
 }
 .footer-brand { flex: 1; min-width: 300px; }
 .footer-logo {
-  display: flex; align-items: center; gap: 10px;
-  margin-bottom: 20px; font-size: 1.5rem; font-weight: 700; color: #00d4ff;
+  display: flex; 
+  align-items: center; 
+  gap: 0px;  /* increased from 10px */
+  margin-bottom: 20px; 
+  font-size: 1.5rem; 
+  font-weight: 700; 
+  color: #00d4ff;
 }
 .footer-tagline { color: #88ccff; font-size: 1.1rem; line-height: 1.6; }
 .footer-links { flex: 2; display: flex; flex-wrap: wrap; gap: 50px; }
@@ -338,9 +344,9 @@
   background: linear-gradient(to bottom, #00e5ff, #0099ff);
 }
 .footer-lottie-wrap {
-  width: 56px;  
-  height: 43px;
-  display:-webkit-flex;
+  width: 72px;   /* increased from 56px */
+  height: 72px;  /* increased from 43px */
+  display: flex;  /* fixed from -webkit-flex */
   align-items: center;
   justify-content: center;
 }

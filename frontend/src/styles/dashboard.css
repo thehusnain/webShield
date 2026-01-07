@@ -399,6 +399,8 @@
     box-shadow 0.35s ease,
     border-color 0.35s ease,
     background 0.35s ease;
+  display: flex;
+  flex-direction: column;
 }
 
 /* Soft glow layer */
@@ -434,9 +436,10 @@
   display: flex;
   align-items: center;
   margin-bottom: 18px;
+  width: 100%;
 }
 
-/* ===================== ICON ===================== */
+/* ===================== ICON - UPDATED FOR LOTTIE ===================== */
 .tool-icon.legacy {
   width: 52px;
   height: 52px;
@@ -444,20 +447,42 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #2962ff 0%, #42a5f5 100%);
-  color: rgb(0, 0, 0);
-  font-weight: 800;
-  font-size: 1.35rem;
+  background: transparent;
   margin-right: 16px;
   box-shadow:
     0 6px 20px rgba(41, 98, 255, 0.3),
     inset 0 1px 0 rgba(255, 255, 255, 0.25);
   flex-shrink: 0;
   transition: transform 0.35s ease;
+  overflow: hidden;
+}
+
+/* Lottie animation for tool icons */
+.tool-lottie {
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
 }
 
 .tool-card.legacy:hover .tool-icon.legacy {
   transform: scale(1.05);
+}
+
+/* Remove the gradient backgrounds since we're using animations */
+.tool-card.legacy:nth-child(1) .tool-icon.legacy {
+  background: transparent;
+}
+
+.tool-card.legacy:nth-child(2) .tool-icon.legacy {
+  background: transparent;
+}
+
+.tool-card.legacy:nth-child(3) .tool-icon.legacy {
+  background: transparent;
+}
+
+.tool-card.legacy:nth-child(4) .tool-icon.legacy {
+  background: transparent;
 }
 
 /* ===================== TITLE ===================== */
@@ -468,7 +493,10 @@
   font-weight: 700;
   letter-spacing: 0.3px;
   text-align: left;
-  width: 100%;
+  width: calc(100% - 68px); /* Fixed: Ensures text doesn't overflow */
+  word-break: break-word;
+  overflow-wrap: break-word;
+  line-height: 1.2;
 }
 
 /* ===================== DESCRIPTION ===================== */
@@ -479,6 +507,10 @@
   margin-bottom: 26px;
   min-height: 44px;
   margin-top: 20px;
+  padding-left: 68px; /* Fixed: Aligns with title */
+  word-break: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
 }
 
 /* ===================== BUTTON ===================== */
@@ -489,7 +521,7 @@
   border-radius: 14px;
   cursor: pointer;
   background: linear-gradient(135deg, #2962ff 0%, #42a5f5 100%);
-  color: rgb(0, 248, 95);
+  color: rgb(0, 0, 0);
   font-weight: 600;
   font-size: 1rem;
   letter-spacing: 0.3px;
@@ -502,6 +534,7 @@
     transform 0.25s ease,
     box-shadow 0.25s ease,
     background 0.25s ease;
+  margin-top: auto;
 }
 
 /* Button shine effect */
@@ -669,6 +702,23 @@
   .stat-value {
     font-size: 2.2rem;
   }
+  
+  /* Mobile fixes for tool cards */
+  .tool-title.legacy {
+    width: calc(100% - 60px);
+    font-size: 1.3rem;
+  }
+  
+  .tool-description.legacy {
+    padding-left: 60px;
+    font-size: 0.9rem;
+  }
+  
+  .tool-icon.legacy {
+    width: 48px;
+    height: 48px;
+    margin-right: 12px;
+  }
 }
 
 @media (max-width: 480px) {
@@ -679,7 +729,6 @@
   .logo-circle {
     width: 50px;
     height: 50px;
-    font-size: 1.5rem;
   }
   
   .tool-card.legacy {
@@ -689,11 +738,19 @@
   .tool-icon.legacy {
     width: 44px;
     height: 44px;
-    font-size: 1.1rem;
+    margin-right: 12px;
   }
   
   .tool-title.legacy {
     font-size: 1.2rem;
+    width: calc(100% - 56px);
+  }
+  
+  .tool-description.legacy {
+    font-size: 0.85rem;
+    padding-left: 56px;
+    margin-top: 15px;
+    margin-bottom: 20px;
   }
 }
 

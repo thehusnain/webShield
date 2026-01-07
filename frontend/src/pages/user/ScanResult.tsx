@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import Lottie from "lottie-react";
 import {
   getScanResultsById,
   generateAIReportForScan,
@@ -8,6 +9,9 @@ import {
   downloadReport,
 } from "../../api/scan-api";
 import "../../styles/scan-result.css";
+import aiAnimation from "../../assets/icons/aiSearching.json";
+import eyeAnimation from "../../assets/icons/found.json";
+import downloadAnimation from "../../assets/icons/Downloading.json";
 
 type ToastType = "success" | "error" | "";
 
@@ -16,7 +20,11 @@ const ScanResult = () => {
   const navigate = useNavigate();
   const [data, setData] = useState<any>(null);
   const [error, setError] = useState("");
-  const [toast, setToast] = useState<{ type: ToastType; message: string }>({ type: "", message: "" });
+  const [toast, setToast] = useState<{ type: ToastType; message: string }>({
+    type: "",
+    message: "",
+  });
+  const [generating, setGenerating] = useState(false);
 
   const showToast = (type: ToastType, message: string) => {
     setToast({ type, message });
@@ -38,11 +46,20 @@ const ScanResult = () => {
 
   const handleGenerate = async () => {
     if (!scanId) return;
+    setGenerating(true);
     try {
       const res = await generateAIReportForScan(scanId);
-      showToast("success", res.data?.message || "AI report generation started.");
+      showToast(
+        "success",
+        res.data?.message || "AI report generation started."
+      );
     } catch (e: any) {
-      showToast("error", e?.response?.data?.error || "Failed to generate report");
+      showToast(
+        "error",
+        e?.response?.data?.error || "Failed to generate report"
+      );
+    } finally {
+      setGenerating(false);
     }
   };
 
@@ -75,7 +92,9 @@ const ScanResult = () => {
       const ct = res.headers["content-type"] || "";
       const dispo = res.headers["content-disposition"] || "";
       const match = dispo.match(/filename="?(.+)"?/i);
-      const filename = match ? match[1] : `report-${scanId}.${ct.includes("pdf") ? "pdf" : "txt"}`;
+      const filename = match
+        ? match[1]
+        : `report-${scanId}.${ct.includes("pdf") ? "pdf" : "txt"}`;
 
       const blob = new Blob([res.data], { type: ct || "application/pdf" });
       const link = document.createElement("a");
@@ -84,12 +103,11 @@ const ScanResult = () => {
       link.click();
       showToast("success", `Downloaded ${filename}`);
     } catch (e: any) {
-      const msg =
-        e?.response?.data
-          ? typeof e.response.data === "string"
-            ? e.response.data
-            : new TextDecoder().decode(e.response.data)
-          : e?.response?.data?.error;
+      const msg = e?.response?.data
+        ? typeof e.response.data === "string"
+          ? e.response.data
+          : new TextDecoder().decode(e.response.data)
+        : e?.response?.data?.error;
       showToast("error", msg || "Failed to download report");
     }
   };
@@ -101,14 +119,11 @@ const ScanResult = () => {
         <p className="scan-subtitle">Scan ID: {scanId}</p>
 
         {toast.message && (
-          <div className={`toast toast-${toast.type}`}>
-            {toast.message}
-          </div>
+          <div className={`toast toast-${toast.type}`}>{toast.message}</div>
         )}
 
         {error && (
           <div className="scan-error">
-            <div className="error-icon">⚠️</div>
             <div className="error-text">{error}</div>
           </div>
         )}
@@ -127,7 +142,9 @@ const ScanResult = () => {
                     : "N/A"}
                 </p>
               </div>
-              <span className={`scan-status status-${data.status}`}>{data.status}</span>
+              <span className={`scan-status status-${data.status}`}>
+                {data.status}
+              </span>
             </div>
 
             <div className="result-body">
@@ -140,26 +157,71 @@ const ScanResult = () => {
             </div>
 
             <div className="result-actions">
-              <button className="tool-button" onClick={handleGenerate}>
-                Generate AI Report
+              <button
+                className="tool-button ai-button"
+                onClick={handleGenerate}
+                disabled={generating}
+              >
+                {generating ? (
+                  <>
+                    <span className="spinner"></span>
+                    Generating...
+                  </>
+                ) : (
+                  <>
+                    <div className="ai-icon-container">
+                      <Lottie
+                        animationData={aiAnimation}
+                        loop
+                        className="ai-lottie"
+                      />
+                    </div>
+                    Generate AI Report
+                  </>
+                )}
               </button>
-              <button className="tool-button" onClick={handleView}>
+
+              <button className="tool-button view-button" onClick={handleView}>
+                <div className="view-icon-container">
+                  <Lottie
+                    animationData={eyeAnimation}
+                    loop
+                    className="ai-lottie"
+                  />
+                </div>
                 View Report
               </button>
-              <button className="tool-button" onClick={handleDownload}>
+
+              <button
+                className="tool-button download-button"
+                onClick={handleDownload}
+              >
+                <div className="download-icon-container">
+                  <Lottie
+                    animationData={downloadAnimation}
+                    loop
+                    className="ai-lottie"
+                  />
+                </div>
                 Download Report
               </button>
             </div>
           </div>
         ) : (
-          <p>Loading...</p>
+          <p className="loading-text">Loading...</p>
         )}
 
         <div className="form-actions">
-          <button className="btn-secondary" onClick={() => navigate("/scan-history")}>
+          <button
+            className="btn-secondary"
+            onClick={() => navigate("/scan-history")}
+          >
             ← Back to History
           </button>
-          <button className="scan-button" onClick={() => navigate("/dashboard")}>
+          <button
+            className="scan-button"
+            onClick={() => navigate("/dashboard")}
+          >
             Go to Dashboard
           </button>
         </div>
