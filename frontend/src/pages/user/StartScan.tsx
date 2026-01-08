@@ -1,3 +1,4 @@
+/* eslint-disable prefer-const */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -74,8 +75,8 @@ const StartScan = () => {
 
     if (user && user.usedScan >= user.scanLimit) {
       setError(
-        `Scan limit reached. You've used ${user.usedScan} of ${user.scanLimit} scans.`
-      );
+  `Scan limit reached. You've used ${Math.min(user.usedScan, user.scanLimit)} of ${user.scanLimit} scans.`
+);
       return;
     }
 
@@ -105,10 +106,15 @@ const StartScan = () => {
       setLoading(true);
       const mappedScanType = tool === "sslscan" ? "ssl" : tool;
 
-      const scanData = {
-        targetUrl: url.trim().replace(/\/+$/, ""),
-        scanType: mappedScanType,
-      };
+     let scanTarget = url.trim().replace(/\/+$/, "");
+// if (tool === "sqlmap" && !scanTarget.includes("?")) {
+//   // If no query string, add a test id
+//   scanTarget += "?id=1";
+// }
+const scanData = {
+  targetUrl: scanTarget,
+  scanType: mappedScanType,
+};
 
       const response = await startScan(scanData);
 
@@ -152,10 +158,13 @@ const StartScan = () => {
     }
   };
 
-  const scanUsagePercent = user
-    ? Math.round((user.usedScan / user.scanLimit) * 100)
+ const usedScanClamped = user
+    ? Math.min(user.usedScan, user.scanLimit)
     : 0;
-
+const scanLimit = user?.scanLimit || 0;
+const scanUsagePercent = scanLimit
+    ? Math.min(Math.round((usedScanClamped / scanLimit) * 100), 100)
+    : 0;
   return (
     <div className="scan-container">
       <div className="scan-card">
@@ -168,9 +177,9 @@ const StartScan = () => {
           {user && (
             <div className="scan-usage">
               <div className="usage-label">
-                Your Scan Usage:{" "}
+                Your Scan Usage: 
                 <span>
-                  {user.usedScan}/{user.scanLimit}
+                  {usedScanClamped}/{scanLimit}
                 </span>
               </div>
               <div className="usage-bar">
